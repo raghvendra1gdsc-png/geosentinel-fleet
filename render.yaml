@@ -1,0 +1,24 @@
+services:
+  # Render Web Service for FastAPI Backend
+  - type: web
+    name: geosentinel-backend
+    runtime: python
+    region: oregon
+    plan: standard
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GEMINI_MODEL
+        value: gemini-2.5-pro
+      - key: SAFETY_FACTOR_THRESHOLD
+        value: "1.5"
+      - key: SANDBOX_TIMEOUT_SECONDS
+        value: "15"
+      - key: FRONTEND_ORIGIN
+        value: "https://geosentinel-fleet.vercel.app,http://localhost:5173"
+      - key: GEMINI_API_KEY
+        sync: false # Set securely in Render dashboard
