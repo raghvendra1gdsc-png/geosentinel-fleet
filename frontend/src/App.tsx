@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Zap, Activity, Cpu, Clock } from 'lucide-react';
+import { ShieldAlert, Clock, Cpu, Zap, Activity } from 'lucide-react';
 import type { MissionEvent, MissionState, ScenarioSummary } from './types/mission';
 import { WebSocketClient } from './services/websocket';
 import { api } from './services/api';
@@ -8,6 +8,10 @@ import { MissionPipeline } from './components/MissionPipeline';
 import { HeroMetrics } from './components/HeroMetrics';
 import { ReplanAlert } from './components/ReplanAlert';
 import { EvidenceChain } from './components/EvidenceChain';
+import { AutonomyScorecard } from './components/AutonomyScorecard';
+import { StructuralSectionView } from './components/StructuralSectionView';
+import { SensorPhysicsCorrelation } from './components/SensorPhysicsCorrelation';
+import { DecisionRationale } from './components/DecisionRationale';
 import { IncidentPanel } from './components/IncidentPanel';
 import { MissionGraph } from './components/MissionGraph';
 import { AgentFleet } from './components/AgentFleet';
@@ -15,6 +19,8 @@ import { AgentTimeline } from './components/AgentTimeline';
 import { EngineeringDashboard } from './components/EngineeringDashboard';
 import { ExecutivePanel } from './components/ExecutivePanel';
 import { WhyAgenticSection } from './components/WhyAgenticSection';
+import { MissionStepControls } from './components/MissionStepControls';
+import { ArchitectureModal } from './components/ArchitectureModal';
 import { MissionReplay } from './components/MissionReplay';
 
 function App() {
@@ -29,6 +35,7 @@ function App() {
   const [isReplaying, setIsReplaying] = useState<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [hasGeminiKey, setHasGeminiKey] = useState<boolean>(true);
+  const [isArchModalOpen, setIsArchModalOpen] = useState<boolean>(false);
 
   // Load scenarios & check health on mount
   useEffect(() => {
@@ -123,6 +130,16 @@ function App() {
       console.error("Failed to trigger mission", e);
       setMissionStatus('FAILED');
     }
+  };
+
+  const resetMission = () => {
+    setMissionStatus('IDLE');
+    setEvents([]);
+    setVisibleEvents([]);
+    setIsReplaying(false);
+    setMissionState(null);
+    setActiveAgent(null);
+    setMissionId(null);
   };
 
   const downloadDossier = async () => {
@@ -242,7 +259,15 @@ function App() {
       {/* ═══════════════ MAIN MISSION CONTROL VIEWPORT ═══════════════ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
 
-        {/* 1. Above-the-Fold Hero Emergency Incident & Dispatch Control Panel */}
+        {/* 1. Mission Step Controls (90s Judge Demo Run, Reset, View Architecture) */}
+        <MissionStepControls
+          onTriggerMission={triggerMission}
+          onResetMission={resetMission}
+          isMissionRunning={isMissionRunning}
+          onOpenArchitecture={() => setIsArchModalOpen(true)}
+        />
+
+        {/* 2. Above-the-Fold Hero Emergency Incident & Dispatch Control Panel */}
         <IncidentPanel
           scenarios={scenarios}
           selectedScenario={selectedScenario}
@@ -252,32 +277,56 @@ function App() {
           missionStatus={missionStatus}
         />
 
-        {/* 2. Live Autonomous Mission Pipeline (The 7-Stage Horizontal Timeline) */}
+        {/* 3. Live Autonomous Mission Pipeline (The 7-Stage Horizontal Timeline) */}
         <MissionPipeline
           stage={missionStatus}
           activeAgent={activeAgent}
           eventsCount={visibleEvents.length}
         />
 
-        {/* 3. Hero Engineering Metrics Transition (0.94 -> 1.74) */}
+        {/* 4. Hero Engineering Metrics Transition (0.94 -> 1.74) */}
         <HeroMetrics
           missionState={missionState}
           stage={missionStatus}
         />
 
-        {/* 4. Validation Override & Replan Moment Alert (When Triggered) */}
+        {/* 5. Autonomy Scorecard (Real Dynamic KPI Counters) */}
+        <AutonomyScorecard
+          events={visibleEvents}
+          stage={missionStatus}
+        />
+
+        {/* 6. Validation Override & Replan Moment Alert (When Triggered) */}
         <ReplanAlert
           events={visibleEvents}
           stage={missionStatus}
         />
 
-        {/* 5. 3-Layer Evidence Chain (Reasoning -> Physics -> Validation) */}
+        {/* 7. 3-Layer Evidence Chain (Reasoning -> Physics -> Validation) */}
         <EvidenceChain
           stage={missionStatus}
           hasReplanned={hasReplanned}
         />
 
-        {/* 6. Live Swarm Topology & Control Graph (Centerpiece) */}
+        {/* 8. Structural Section State Transition (Before & After RC Pier Section Diagram) */}
+        <StructuralSectionView
+          missionState={missionState}
+          stage={missionStatus}
+        />
+
+        {/* 9. Sensor -> Deterministic Physics Correlation Matrix */}
+        <SensorPhysicsCorrelation
+          missionState={missionState}
+          stage={missionStatus}
+        />
+
+        {/* 10. Autonomous Decision Rationale ("Why Did The Agent Do That?") */}
+        <DecisionRationale
+          events={visibleEvents}
+          stage={missionStatus}
+        />
+
+        {/* 11. Live Swarm Topology & Control Graph (Centerpiece) */}
         <MissionGraph
           activeAgent={activeAgent}
           events={visibleEvents}
@@ -285,7 +334,7 @@ function App() {
           missionState={missionState}
         />
 
-        {/* 7. Mission Replay Controls (When Activated) */}
+        {/* 12. Mission Replay Controls (When Activated) */}
         {isReplaying && events.length > 0 && (
           <MissionReplay
             events={events}
@@ -297,14 +346,14 @@ function App() {
           />
         )}
 
-        {/* 8. Autonomous Specialist Fleet Status Cards */}
+        {/* 13. Autonomous Specialist Fleet Status Cards */}
         <AgentFleet
           activeAgent={activeAgent}
           events={visibleEvents}
           stage={missionStatus}
         />
 
-        {/* 9. Main Dual Grid: Operational Swarm Terminal + Deterministic Physics Workstation */}
+        {/* 14. Main Dual Grid: Operational Swarm Terminal + Deterministic Physics Workstation */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
           {/* Left Column: Live Terminal Stream with Severity Tags */}
           <AgentTimeline events={visibleEvents} />
@@ -313,7 +362,7 @@ function App() {
           <EngineeringDashboard missionState={missionState} />
         </div>
 
-        {/* 10. Concluded Executive Remediation Directive & Audit Dossier Package */}
+        {/* 15. Concluded Executive Remediation Directive & Audit Dossier Package */}
         <ExecutivePanel
           missionState={missionState}
           onDownloadDossier={downloadDossier}
@@ -321,9 +370,15 @@ function App() {
           isReplaying={isReplaying}
         />
 
-        {/* 11. Why GeoSentinel Is Truly Agentic (7-Point Breakdown for Judges) */}
+        {/* 16. Why GeoSentinel Is Truly Agentic (7-Point Breakdown for Judges) */}
         <WhyAgenticSection />
       </main>
+
+      {/* ═══════════════ ARCHITECTURE MODAL ═══════════════ */}
+      <ArchitectureModal
+        isOpen={isArchModalOpen}
+        onClose={() => setIsArchModalOpen(false)}
+      />
 
       {/* ═══════════════ OPERATIONAL FOOTER ═══════════════ */}
       <footer className="border-t border-white/10 bg-[#07080f]/90 mt-12">
