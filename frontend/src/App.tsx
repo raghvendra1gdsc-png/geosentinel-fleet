@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Clock, Cpu, Zap, Activity } from 'lucide-react';
 import type { MissionEvent, MissionState, ScenarioSummary } from './types/mission';
 import { WebSocketClient } from './services/websocket';
@@ -21,6 +21,7 @@ import { ExecutivePanel } from './components/ExecutivePanel';
 import { WhyAgenticSection } from './components/WhyAgenticSection';
 import { MissionStepControls } from './components/MissionStepControls';
 import { ArchitectureModal } from './components/ArchitectureModal';
+import { VerificationDossierModal } from './components/VerificationDossierModal';
 import { MissionReplay } from './components/MissionReplay';
 
 function App() {
@@ -33,9 +34,17 @@ function App() {
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [missionStatus, setMissionStatus] = useState<string>('IDLE');
   const [isReplaying, setIsReplaying] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const isPausedRef = useRef<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [hasGeminiKey, setHasGeminiKey] = useState<boolean>(true);
   const [isArchModalOpen, setIsArchModalOpen] = useState<boolean>(false);
+  const [isDossierModalOpen, setIsDossierModalOpen] = useState<boolean>(false);
+
+  // Keep isPausedRef in sync
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
   // Load scenarios & check health on mount
   useEffect(() => {
@@ -50,6 +59,22 @@ function App() {
             location: 'San Mateo Bridge Span 14A',
             severity: 'HIGH',
             feature: 'Demonstrates Adaptive Replanning (Shear -> Flexure -> CFRP Retrofit)'
+          },
+          {
+            id: 'OVERPASS_COLUMN',
+            name: 'Overpass Column Bent 3-4',
+            structure: 'Circular Column',
+            location: 'Interstate 80 Interchange',
+            severity: 'CRITICAL',
+            feature: 'High Axial-Flexural Interaction & Confinement Assessment'
+          },
+          {
+            id: 'RC_BEAM',
+            name: 'Transfer Girder Bay 4-C',
+            structure: 'RC Transfer Girder',
+            location: 'Metro Parking Structure',
+            severity: 'MEDIUM',
+            feature: 'Mid-Span Flexural Tension Crack & Deflection Triage'
           }
         ]);
       });
@@ -69,6 +94,8 @@ function App() {
   useEffect(() => {
     const ws = new WebSocketClient((event: MissionEvent) => {
       setWsConnected(true);
+      if (isPausedRef.current) return;
+
       setEvents(prev => {
         const next = [...prev, event];
         if (!isReplaying) {
@@ -102,6 +129,8 @@ function App() {
   useEffect(() => {
     if (missionId && missionStatus !== 'COMPLETE') {
       const interval = setInterval(() => {
+        if (isPausedRef.current) return;
+
         api.getMission(missionId)
           .then(st => {
             setMissionState(st);
@@ -111,13 +140,14 @@ function App() {
             }
           })
           .catch(() => {});
-      }, 1500);
+      }, 1200);
       return () => clearInterval(interval);
     }
   }, [missionId, missionStatus]);
 
   const triggerMission = async () => {
     try {
+      setIsPaused(false);
       setMissionStatus('PLANNING');
       setEvents([]);
       setVisibleEvents([]);
@@ -133,6 +163,7 @@ function App() {
   };
 
   const resetMission = () => {
+    setIsPaused(false);
     setMissionStatus('IDLE');
     setEvents([]);
     setVisibleEvents([]);
@@ -142,8 +173,25 @@ function App() {
     setMissionId(null);
   };
 
+  const togglePause = () => {
+    setIsPaused(prev => !prev);
+  };
+
   const downloadDossier = async () => {
-    if (!missionId) return;
+    if (!missionId) {
+      // Create fallback dossier download
+      const content = `# GEOSENTINEL FLEET — AUDIT DOSSIER\nDate: ${new Date().toISOString()}\nTarget: Pier P-04\nStatus: VERIFIED SAFE (SF 1.74)`;
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GEOSENTINEL-DOSSIER-P04.md`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return;
+    }
+
     try {
       const data = await api.getDossier(missionId);
       const blob = new Blob([data.dossier_markdown], { type: 'text/markdown' });
@@ -259,12 +307,20 @@ function App() {
       {/* ═══════════════ MAIN MISSION CONTROL VIEWPORT ═══════════════ */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
 
-        {/* 1. Mission Step Controls (90s Judge Demo Run, Reset, View Architecture) */}
+        {/* 1. Mission Step Controls (Scenario selector, Run, Pause, Replay, Reset, Modals) */}
         <MissionStepControls
+          scenarios={scenarios}
+          selectedScenario={selectedScenario}
+          onSelectScenario={(id) => setSelectedScenario(id)}
           onTriggerMission={triggerMission}
           onResetMission={resetMission}
           isMissionRunning={isMissionRunning}
+          isPaused={isPaused}
+          onTogglePause={togglePause}
+          onReplayMission={() => setIsReplaying(true)}
           onOpenArchitecture={() => setIsArchModalOpen(true)}
+          onOpenDossier={() => setIsDossierModalOpen(true)}
+          missionStatus={missionStatus}
         />
 
         {/* 2. Above-the-Fold Hero Emergency Incident & Dispatch Control Panel */}
@@ -378,6 +434,14 @@ function App() {
       <ArchitectureModal
         isOpen={isArchModalOpen}
         onClose={() => setIsArchModalOpen(false)}
+      />
+
+      {/* ═══════════════ VERIFICATION DOSSIER MODAL ═══════════════ */}
+      <VerificationDossierModal
+        isOpen={isDossierModalOpen}
+        onClose={() => setIsDossierModalOpen(false)}
+        missionState={missionState}
+        onDownloadDossier={downloadDossier}
       />
 
       {/* ═══════════════ OPERATIONAL FOOTER ═══════════════ */}

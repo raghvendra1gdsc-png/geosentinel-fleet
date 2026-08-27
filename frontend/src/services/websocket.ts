@@ -16,7 +16,12 @@ function getWebSocketUrl(): string {
     return `${wsProtocol}${host}/ws/swarm-feed`;
   }
 
-  // 3. Default Local Development
+  // 3. Production host detection (e.g. Vercel / Cloud)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return "wss://geosentinel-fleet-1.onrender.com/ws/swarm-feed";
+  }
+
+  // 4. Default Local Development
   return "ws://localhost:8000/ws/swarm-feed";
 }
 

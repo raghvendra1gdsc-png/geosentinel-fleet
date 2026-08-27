@@ -7,7 +7,12 @@ function getApiBaseUrl(): string {
     return `${envUrl.trim().replace(/\/$/, '')}/api/v1`;
   }
 
-  // 2. Default Local Development
+  // 2. Production host detection (e.g. Vercel / Netlify / Cloud)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return "https://geosentinel-fleet-1.onrender.com/api/v1";
+  }
+
+  // 3. Default Local Development
   return "http://localhost:8000/api/v1";
 }
 
