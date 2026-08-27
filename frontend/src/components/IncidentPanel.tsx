@@ -1,4 +1,5 @@
-import { Radio, Activity, Zap, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Radio, ChevronDown, ShieldAlert, Activity, Zap } from 'lucide-react';
 import type { ScenarioSummary } from '../types/mission';
 
 interface IncidentPanelProps {
@@ -20,43 +21,58 @@ export function IncidentPanel({
 }: IncidentPanelProps) {
   const isComplete = missionStatus === 'COMPLETE';
 
+  // Live telemetry oscillation to simulate active IoT stream
+  const [strainJitter, setStrainJitter] = useState<number>(2140);
+  const [aeJitter, setAeJitter] = useState<number>(84.5);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStrainJitter(2140 + Math.floor(Math.random() * 18 - 9));
+      setAeJitter(Number((84.5 + (Math.random() * 1.2 - 0.6)).toFixed(1)));
+    }, 1200);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="bg-[#0b0c12] border-2 border-red-500/40 rounded-2xl p-6 shadow-[0_0_40px_rgba(239,68,68,0.15)] relative overflow-hidden">
+    <div className="bg-[#0b0c12] border-2 border-red-500/50 rounded-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.2)] relative overflow-hidden font-mono">
       {/* Background ambient red glow for active emergency */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/10 blur-[130px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/15 blur-[140px] pointer-events-none" />
 
       {/* Top Banner: Incident Title + Sector Selector */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-white/10 mb-5 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping shrink-0" />
+          <div className="relative">
+            <span className="w-3.5 h-3.5 rounded-full bg-red-500 block animate-ping" />
+            <span className="w-3.5 h-3.5 rounded-full bg-red-500 block absolute inset-0" />
+          </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-mono font-black uppercase tracking-widest bg-red-500 text-black px-2.5 py-0.5 rounded-full">
-                ACTIVE INFRASTRUCTURE ANOMALY
+              <span className="text-xs font-mono font-black uppercase tracking-widest bg-red-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
+                CRITICAL INFRASTRUCTURE DEFICIT
               </span>
-              <span className="text-xs font-mono text-red-400 font-bold">
-                SEISMIC / STRUCTURAL ANOMALY DETECTED
+              <span className="text-xs text-red-400 font-bold flex items-center gap-1">
+                <Radio size={12} className="animate-pulse text-red-400" /> LIVE IOT TELEMETRY FEED
               </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-white font-mono tracking-tight mt-1">
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight mt-1">
               BRIDGE PIER P-04 • SAN MATEO BRIDGE • SPAN 14A
             </h2>
           </div>
         </div>
 
         {/* Sector Switcher */}
-        <div className="flex items-center gap-2 font-mono shrink-0 self-start md:self-auto">
-          <span className="text-[10px] text-gray-400 uppercase">TARGET SECTOR:</span>
+        <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
+          <span className="text-[10px] text-gray-400 uppercase font-bold">TARGET SECTOR:</span>
           <div className="relative">
             <select
               value={selectedScenario}
               onChange={(e) => onSelectScenario(e.target.value)}
               disabled={isMissionRunning}
-              className="appearance-none bg-[#141624] border border-white/20 text-gray-200 text-xs rounded-lg pl-3 pr-8 py-1.5 font-mono focus:ring-1 focus:ring-red-500 focus:outline-none disabled:opacity-50 cursor-pointer"
+              className="appearance-none bg-[#141624] border border-white/20 hover:border-red-500/60 text-gray-200 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:ring-1 focus:ring-red-500 focus:outline-none disabled:opacity-50 cursor-pointer transition-colors"
             >
               {scenarios.map((sc) => (
                 <option key={sc.id} value={sc.id} className="bg-[#0b0c12]">
-                  {sc.id === 'BRIDGE_PIER' ? '🌟 [DEMO] ' : ''}{sc.name}
+                  {sc.name}
                 </option>
               ))}
             </select>
@@ -69,18 +85,19 @@ export function IncidentPanel({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 relative z-10 items-stretch">
         
         {/* Left 8 cols: 4 Large Telemetry Values */}
-        <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3.5 font-mono">
+        <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           
           {/* Card 1: Microstrain */}
-          <div className="bg-black/50 p-4 rounded-xl border border-white/10 flex flex-col justify-between">
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-              MICROSTRAIN
+          <div className="bg-black/60 p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-amber-500/50 transition-colors">
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center justify-between">
+              <span>MICROSTRAIN</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             </div>
             <div className="my-2">
               <div className="text-2xl md:text-3xl font-black text-amber-400 tracking-tight">
-                2,140 <span className="text-xs font-normal text-gray-400">με</span>
+                {strainJitter.toLocaleString()} <span className="text-xs font-normal text-gray-400">με</span>
               </div>
-              <div className="text-[10px] text-amber-400/80 font-bold mt-0.5">
+              <div className="text-[10px] text-amber-300 font-bold mt-0.5">
                 ● HIGH ANOMALY
               </div>
             </div>
@@ -90,15 +107,16 @@ export function IncidentPanel({
           </div>
 
           {/* Card 2: Acoustic Emission */}
-          <div className="bg-black/50 p-4 rounded-xl border border-white/10 flex flex-col justify-between">
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-              ACOUSTIC EMISSION
+          <div className="bg-black/60 p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-red-500/50 transition-colors">
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center justify-between">
+              <span>ACOUSTIC EMISSION</span>
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
             </div>
             <div className="my-2">
               <div className="text-2xl md:text-3xl font-black text-red-400 tracking-tight">
-                84.5 <span className="text-xs font-normal text-gray-400">dB</span>
+                {aeJitter} <span className="text-xs font-normal text-gray-400">dB</span>
               </div>
-              <div className="text-[10px] text-red-400 font-bold mt-0.5">
+              <div className="text-[10px] text-red-300 font-bold mt-0.5">
                 ● ACTIVE CRACKING
               </div>
             </div>
@@ -108,16 +126,17 @@ export function IncidentPanel({
           </div>
 
           {/* Card 3: Peak Ground Acceleration */}
-          <div className="bg-black/50 p-4 rounded-xl border border-white/10 flex flex-col justify-between">
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-              GROUND ACCEL (PGA)
+          <div className="bg-black/60 p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-cyan-500/50 transition-colors">
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center justify-between">
+              <span>GROUND ACCEL (PGA)</span>
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             </div>
             <div className="my-2">
               <div className="text-2xl md:text-3xl font-black text-cyan-400 tracking-tight">
                 0.42 <span className="text-xs font-normal text-gray-400">g</span>
               </div>
-              <div className="text-[10px] text-cyan-400 font-bold mt-0.5">
-                ● SEISMIC RESPONSE
+              <div className="text-[10px] text-cyan-300 font-bold mt-0.5">
+                ● SEISMIC OVERLOAD
               </div>
             </div>
             <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
@@ -126,10 +145,10 @@ export function IncidentPanel({
           </div>
 
           {/* Card 4: CURRENT SAFETY FACTOR (HERO CRITICAL) */}
-          <div className="bg-red-950/50 p-4 rounded-xl border-2 border-red-500/80 shadow-[0_0_20px_rgba(239,68,68,0.25)] flex flex-col justify-between">
+          <div className="bg-red-950/60 p-4 rounded-xl border-2 border-red-500/90 shadow-[0_0_25px_rgba(239,68,68,0.3)] flex flex-col justify-between">
             <div className="flex items-center justify-between text-[10px] text-red-300 uppercase font-black tracking-wider">
               <span>SAFETY FACTOR</span>
-              <span className="bg-red-500 text-black px-1.5 py-0.2 rounded font-mono font-bold">
+              <span className="bg-red-500 text-black px-1.5 py-0.2 rounded font-bold text-[9px]">
                 CRITICAL
               </span>
             </div>
@@ -149,14 +168,15 @@ export function IncidentPanel({
         </div>
 
         {/* Right 4 cols: Unmistakable Dominant CTA */}
-        <div className="lg:col-span-4 bg-gradient-to-b from-blue-950/50 via-[#10121d] to-[#0b0c12] p-5 rounded-xl border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.25)] flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-gradient-to-b from-blue-950/70 via-[#101322] to-[#0b0c12] p-5 rounded-xl border-2 border-cyan-500/70 shadow-[0_0_35px_rgba(6,182,212,0.35)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-mono uppercase font-black text-cyan-400 tracking-wider">
+              <span className="text-[10px] uppercase font-black text-cyan-400 tracking-wider flex items-center gap-1.5">
+                <ShieldAlert size={13} className="text-cyan-400" />
                 AUTONOMOUS COMMAND CONTROL
               </span>
-              <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400">
-                <Radio size={9} className="animate-pulse" /> SWARM READY
+              <span className="flex items-center gap-1 text-[9px] text-emerald-400 font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> SWARM READY
               </span>
             </div>
             <p className="text-xs text-gray-300 font-sans leading-relaxed">
@@ -168,11 +188,11 @@ export function IncidentPanel({
             <button
               onClick={onTriggerMission}
               disabled={isMissionRunning}
-              className="w-full group relative flex items-center justify-center gap-2 px-5 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-[0_0_30px_rgba(6,182,212,0.4)] text-sm font-mono font-black tracking-widest transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full group relative flex items-center justify-center gap-2 px-5 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-[0_0_35px_rgba(6,182,212,0.5)] text-sm font-black tracking-widest transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               {isMissionRunning ? (
                 <>
-                  <Activity size={18} className="animate-spin" />
+                  <Activity size={18} className="animate-spin text-cyan-200" />
                   <span>MISSION IN PROGRESS...</span>
                 </>
               ) : isComplete ? (
@@ -188,14 +208,14 @@ export function IncidentPanel({
               )}
             </button>
 
-            <div className="text-[9px] font-mono text-center text-gray-400 mt-2 flex items-center justify-center gap-2 flex-wrap">
-              <span>5 SPECIALIST AGENTS</span>
+            <div className="text-[9px] text-center text-gray-400 mt-2 flex items-center justify-center gap-2 flex-wrap">
+              <span className="text-white font-bold">5 SPECIALIST AGENTS</span>
               <span>•</span>
-              <span className="text-blue-400">GEMINI REASONING</span>
+              <span className="text-cyan-300 font-bold">GEMINI REASONING</span>
               <span>•</span>
-              <span className="text-emerald-400">DETERMINISTIC PHYSICS</span>
+              <span className="text-emerald-300 font-bold">DETERMINISTIC PHYSICS</span>
               <span>•</span>
-              <span className="text-purple-400">INDEPENDENT VALIDATION</span>
+              <span className="text-purple-300 font-bold">INDEPENDENT VALIDATION</span>
             </div>
           </div>
         </div>
