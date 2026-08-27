@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Download, RotateCcw, Radio, Zap, Globe, Activity } from 'lucide-react';
+import { ShieldAlert, Radio, Zap, Activity, Cpu, Clock } from 'lucide-react';
 import type { MissionEvent, MissionState, ScenarioSummary } from './types/mission';
 import { WebSocketClient } from './services/websocket';
 import { api } from './services/api';
 
-import { WhyAgenticPanel } from './components/WhyAgenticPanel';
+import { MissionPipeline } from './components/MissionPipeline';
+import { HeroMetrics } from './components/HeroMetrics';
+import { ReplanAlert } from './components/ReplanAlert';
 import { IncidentPanel } from './components/IncidentPanel';
+import { MissionGraph } from './components/MissionGraph';
 import { AgentFleet } from './components/AgentFleet';
 import { AgentTimeline } from './components/AgentTimeline';
 import { EngineeringDashboard } from './components/EngineeringDashboard';
@@ -23,13 +26,13 @@ function App() {
   const [missionStatus, setMissionStatus] = useState<string>('IDLE');
   const [isReplaying, setIsReplaying] = useState<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [hasGeminiKey, setHasGeminiKey] = useState<boolean>(true);
 
-  // Load scenarios on mount
+  // Load scenarios & check health on mount
   useEffect(() => {
     api.getScenarios()
       .then(data => setScenarios(data))
       .catch(() => {
-        // Fallback default scenario
         setScenarios([
           {
             id: 'BRIDGE_PIER',
@@ -41,6 +44,16 @@ function App() {
           }
         ]);
       });
+
+    // Check health endpoint for backend & Gemini link status
+    api.getHealth()
+      .then(res => {
+        setWsConnected(true);
+        if (res.gemini_configured !== undefined) {
+          setHasGeminiKey(res.gemini_configured);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Connect WebSocket
@@ -128,139 +141,140 @@ function App() {
   };
 
   const isMissionRunning = missionStatus !== 'IDLE' && missionStatus !== 'COMPLETE' && missionStatus !== 'FAILED';
+  const toolCallsCount = visibleEvents.filter(e => e.tool).length;
+  const uniqueAgentsCount = new Set(visibleEvents.map(e => e.agent)).size;
 
   return (
-    <div className="min-h-screen bg-[#050507] bg-grid-pattern text-gray-200 selection:bg-primary/30 selection:text-white">
+    <div className="min-h-screen bg-[#05060a] bg-grid-pattern text-gray-200 selection:bg-cyan-500/30 selection:text-white font-sans antialiased">
 
-      {/* ═══════════════ HERO HEADER ═══════════════ */}
-      <header className="relative overflow-hidden border-b border-white/5">
-        {/* Ambient gradient blobs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            {/* Left: Brand */}
-            <div className="flex items-center gap-4">
+      {/* ═══════════════ TACTICAL COMMAND HEADER ═══════════════ */}
+      <header className="border-b border-white/10 bg-[#07080f]/90 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Brand & System Title */}
+            <div className="flex items-center gap-3.5">
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 ring-1 ring-white/10">
-                  <ShieldAlert size={28} />
+                <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-600 text-white rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.3)] ring-1 ring-white/20">
+                  <ShieldAlert size={24} />
                 </div>
-                {/* Pulse ring */}
                 {isMissionRunning && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500" />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500" />
                   </span>
                 )}
               </div>
+
               <div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-2xl font-black text-white tracking-tight">
-                    GeoSentinel Fleet
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-base font-black text-white font-mono tracking-tight">
+                    GEOSENTINEL FLEET
                   </h1>
-                  <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-blue-950/80 to-indigo-950/80 text-blue-300 border border-blue-700/50 px-2.5 py-0.5 rounded-full">
-                    v1.0 • Hackathon
+                  <span className="text-[9px] font-mono font-bold bg-white/[0.04] text-gray-300 border border-white/10 px-2 py-0.5 rounded">
+                    AUTONOMOUS INFRASTRUCTURE RESPONSE
                   </span>
-                  <span className={`flex items-center gap-1.5 text-[10px] font-mono font-semibold border px-2.5 py-0.5 rounded-full transition-all ${
-                    wsConnected
-                      ? 'text-emerald-300 bg-emerald-950/60 border-emerald-700/50 glow-green'
-                      : 'text-gray-400 bg-gray-900/60 border-gray-700'
-                  }`}>
-                    <Radio size={10} className={wsConnected ? "animate-pulse" : ""} />
-                    {wsConnected ? 'WS LIVE' : 'CONNECTING'}
+                  <span className="text-[9px] font-mono text-cyan-400/80 border border-cyan-500/30 bg-cyan-950/40 px-2 py-0.5 rounded hidden sm:inline-block">
+                    GOOGLE ALL THINGS AGENTIC • 2026
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1 max-w-lg leading-relaxed">
-                  Autonomous Multi-Agent Infrastructure Emergency Response — Powered by <span className="text-blue-400 font-semibold">Google Gemini 2.5 Pro</span>
-                </p>
+
+                <div className="text-[11px] text-gray-400 font-mono mt-0.5 flex items-center gap-2">
+                  <span>Gemini 2.5 Pro Reasons • Physics Calculates • Validation Enforces Trust</span>
+                </div>
               </div>
             </div>
 
-            {/* Right: Action buttons */}
-            <div className="flex items-center gap-3 flex-wrap">
-              {events.length > 0 && missionStatus === 'COMPLETE' && (
-                <>
-                  <button
-                    onClick={() => setIsReplaying(!isReplaying)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-mono font-semibold border border-white/10 transition-all hover:border-white/20"
-                  >
-                    <RotateCcw size={14} className="text-cyan-400" />
-                    <span>{isReplaying ? 'Live View' : 'Replay Mission'}</span>
-                  </button>
-
-                  <button
-                    onClick={downloadDossier}
-                    className="flex items-center gap-1.5 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-mono font-semibold border border-white/10 transition-all hover:border-white/20"
-                  >
-                    <Download size={14} className="text-green-400" />
-                    <span>Audit Dossier</span>
-                  </button>
-                </>
-              )}
-
-              <button
-                onClick={triggerMission}
-                disabled={isMissionRunning}
-                className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-lg shadow-blue-600/25 text-xs font-bold font-mono tracking-wider transition-all hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {isMissionRunning ? (
-                  <Activity size={14} className="animate-spin-slow" />
-                ) : (
-                  <Zap size={14} className="group-hover:animate-pulse" />
-                )}
-                <span>
-                  {isMissionRunning
-                    ? 'MISSION IN PROGRESS...'
-                    : 'TRIGGER ANOMALY TRIAGE'}
+            {/* Right: Live Connection Status & Mission Telemetry */}
+            <div className="flex items-center gap-3 font-mono text-xs flex-wrap">
+              {/* Link Status */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-[10px]">
+                <Radio size={11} className={wsConnected ? "text-emerald-400 animate-pulse" : "text-amber-400"} />
+                <span className={wsConnected ? "text-emerald-300 font-bold" : "text-gray-400"}>
+                  {wsConnected ? '● SYSTEM ONLINE' : 'CONNECTING...'}
                 </span>
-              </button>
+                <span className="text-gray-600">|</span>
+                <span className={hasGeminiKey ? "text-cyan-400 font-bold" : "text-amber-400"}>
+                  {hasGeminiKey ? '● GEMINI LINK ACTIVE' : '● FALLBACK MODE'}
+                </span>
+              </div>
+
+              {/* Target Quick Tag */}
+              <div className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-[10px] text-gray-300 hidden md:flex items-center gap-1.5">
+                <span className="text-gray-500">TARGET:</span>
+                <span className="text-white font-bold">PIER P-04</span>
+                <span className="text-red-400 font-bold">[HIGH]</span>
+              </div>
             </div>
           </div>
 
-          {/* Live Stats Bar (during or after mission) */}
-          {(events.length > 0 || isMissionRunning) && (
-            <div className="mt-4 flex items-center gap-4 text-[10px] font-mono text-gray-400">
+          {/* Operational Metrics Bar (Live During Execution) */}
+          {(visibleEvents.length > 0 || isMissionRunning) && (
+            <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-4 text-[10px] font-mono text-gray-400 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <Globe size={11} className="text-blue-400" />
-                <span>{events.length} events streamed</span>
+                <Clock size={11} className="text-cyan-400" />
+                <span>Elapsed: <strong className="text-white">{visibleEvents[visibleEvents.length - 1]?.elapsed_seconds?.toFixed(1) || '0.0'}s</strong></span>
+              </div>
+              <span className="text-gray-700">|</span>
+              <div className="flex items-center gap-1.5">
+                <Cpu size={11} className="text-blue-400" />
+                <span>Active Swarm: <strong className="text-cyan-300">{uniqueAgentsCount}/5 Agents</strong></span>
+              </div>
+              <span className="text-gray-700">|</span>
+              <div className="flex items-center gap-1.5">
+                <Zap size={11} className="text-amber-400" />
+                <span>Tool Executions: <strong className="text-white">{toolCallsCount}</strong></span>
               </div>
               <span className="text-gray-700">|</span>
               <div className="flex items-center gap-1.5">
                 <Activity size={11} className={isMissionRunning ? "text-amber-400 animate-pulse" : "text-emerald-400"} />
-                <span className={isMissionRunning ? "text-amber-400" : "text-emerald-400"}>
-                  {missionStatus}
-                </span>
+                <span>Phase: <strong className={isMissionRunning ? "text-amber-300 uppercase" : "text-emerald-400 uppercase"}>{missionStatus}</strong></span>
               </div>
-              {missionState?.initial_safety_factor && (
-                <>
-                  <span className="text-gray-700">|</span>
-                  <span>Pre-SF: <strong className="text-amber-400">{missionState.initial_safety_factor}</strong></span>
-                  {missionState.post_retrofit_safety_factor && (
-                    <span>→ Post-SF: <strong className="text-emerald-400">{missionState.post_retrofit_safety_factor}</strong></span>
-                  )}
-                </>
-              )}
             </div>
           )}
         </div>
       </header>
 
-      {/* ═══════════════ MAIN CONTENT ═══════════════ */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+      {/* ═══════════════ MAIN MISSION CONTROL VIEWPORT ═══════════════ */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
 
-        {/* Hackathon Judge Highlight Banner */}
-        <WhyAgenticPanel />
+        {/* 1. Live Autonomous Mission Pipeline (Replaces static WhyAgentic) */}
+        <MissionPipeline
+          stage={missionStatus}
+          activeAgent={activeAgent}
+          eventsCount={visibleEvents.length}
+        />
 
-        {/* Target Incident Selector & Telemetry */}
+        {/* 2. Hero Engineering Metrics Transition (0.94 -> 1.74) */}
+        <HeroMetrics
+          missionState={missionState}
+          stage={missionStatus}
+        />
+
+        {/* 3. Validation Override & Replan Moment Alert (When Triggered) */}
+        <ReplanAlert
+          events={visibleEvents}
+          stage={missionStatus}
+        />
+
+        {/* 4. Hero Emergency Incident & Dispatch Control Panel */}
         <IncidentPanel
           scenarios={scenarios}
           selectedScenario={selectedScenario}
           onSelectScenario={(id) => setSelectedScenario(id)}
           isMissionRunning={isMissionRunning}
+          onTriggerMission={triggerMission}
+          missionStatus={missionStatus}
         />
 
-        {/* Mission Replay Controls (when active) */}
+        {/* 5. Live Swarm Topology & Control Graph (Centerpiece) */}
+        <MissionGraph
+          activeAgent={activeAgent}
+          events={visibleEvents}
+          stage={missionStatus}
+          missionState={missionState}
+        />
+
+        {/* 6. Mission Replay Controls (When Activated) */}
         {isReplaying && events.length > 0 && (
           <MissionReplay
             events={events}
@@ -272,34 +286,46 @@ function App() {
           />
         )}
 
-        {/* Fleet Status Cards */}
+        {/* 7. Autonomous Specialist Fleet Status Cards */}
         <AgentFleet
           activeAgent={activeAgent}
           events={visibleEvents}
           stage={missionStatus}
         />
 
-        {/* Main Dual Grid: Timeline + Physics Dashboard */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Left Column: Live Agent Timeline */}
+        {/* 8. Main Dual Grid: Operational Swarm Terminal + Deterministic Physics Workstation */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+          {/* Left Column: Live Terminal Stream */}
           <AgentTimeline events={visibleEvents} />
 
-          {/* Right Column: Engineering Physics Dashboard */}
+          {/* Right Column: Deterministic Physics Workstation */}
           <EngineeringDashboard missionState={missionState} />
         </div>
 
-        {/* Executive Decision Banner (Visible upon Completion) */}
+        {/* 9. Concluded Executive Remediation Directive & Audit Dossier Package */}
         <ExecutivePanel
           missionState={missionState}
           onDownloadDossier={downloadDossier}
+          onReplayMission={() => setIsReplaying(!isReplaying)}
+          isReplaying={isReplaying}
         />
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-[10px] font-mono text-gray-600">
-          <span>GeoSentinel Fleet v1.0 • Google All Things Agentic Hackathon 2026</span>
-          <span>Gemini 2.5 Pro • NumPy • OpenSeesPy • ACI 318 / ASCE 41 / ACI 440.2R</span>
+      {/* ═══════════════ OPERATIONAL FOOTER ═══════════════ */}
+      <footer className="border-t border-white/10 bg-[#07080f]/80 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] font-mono text-gray-500">
+          <div>
+            <span className="text-gray-300 font-bold">GEOSENTINEL FLEET</span> • Autonomous Infrastructure Swarm • Google All Things Agentic Hackathon
+          </div>
+          <div className="flex items-center gap-3">
+            <span>Gemini 2.5 Pro</span>
+            <span>•</span>
+            <span>NumPy</span>
+            <span>•</span>
+            <span>OpenSeesPy</span>
+            <span>•</span>
+            <span>ACI 318 / ASCE 41 / ACI 440.2R</span>
+          </div>
         </div>
       </footer>
     </div>

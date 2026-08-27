@@ -1,4 +1,4 @@
-import { Activity, ShieldCheck, Cpu, Wrench, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Activity, ShieldCheck, Cpu, Wrench, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { MissionEvent } from '../types/mission';
 
 interface AgentFleetProps {
@@ -11,64 +11,63 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
   const agents = [
     {
       id: 'Commander',
-      name: 'Commander',
-      icon: Cpu,
-      role: 'Autonomous Coordinator',
+      name: 'Commander Agent',
+      shortRole: 'SWARM COORDINATOR',
       engine: 'Google Gemini 2.5 Pro',
-      desc: 'Formulates hypotheses & replans triage strategy'
+      icon: Cpu,
+      color: 'blue'
     },
     {
       id: 'StructuralAgent',
       name: 'Structural Agent',
+      shortRole: 'CONCRETE MECHANICS',
+      engine: 'NumPy ACI 318-19 / ASCE 41',
       icon: Activity,
-      role: 'Concrete Mechanics',
-      engine: 'NumPy Mechanics (ACI 318 / ASCE 41)',
-      desc: 'Computes shear capacity & section ductility'
+      color: 'emerald'
     },
     {
       id: 'SimulationAgent',
       name: 'Simulation Agent',
+      shortRole: 'FIBER FEA SOLVER',
+      engine: 'OpenSeesPy v3.8 Engine',
       icon: RefreshCw,
-      role: 'FEA Pushover Sandbox',
-      engine: 'OpenSeesPy v3.8 Fiber Engine',
-      desc: 'Executes nonlinear pushover modeling'
+      color: 'cyan'
     },
     {
       id: 'RetrofitAgent',
       name: 'Retrofit Agent',
+      shortRole: 'CFRP DESIGN OPTIMIZER',
+      engine: 'ACI 440.2R Solver',
       icon: Wrench,
-      role: 'CFRP Composite Design',
-      engine: 'ACI 440.2R Optimizer',
-      desc: 'Calculates carbon-fiber strengthening schedule'
+      color: 'purple'
     },
     {
       id: 'ValidationAgent',
       name: 'Validation Agent',
+      shortRole: 'INDEPENDENT AUDITOR',
+      engine: 'Isolated Safety Gate',
       icon: ShieldCheck,
-      role: 'Independent Auditor',
-      engine: 'Isolated Safety Verification Gate',
-      desc: 'Audits evidence & enforces SF >= 1.50'
+      color: 'amber'
     },
   ];
 
   return (
-    <div className="bg-surface rounded-2xl p-5 border border-white/5 shadow-2xl">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-[#0b0c12] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+      <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
-            <Cpu size={14} className="text-blue-400" />
-          </div>
-          <h2 className="text-xs font-bold text-gray-300 uppercase tracking-wider font-mono">
-            Autonomous Specialist Fleet
-          </h2>
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-200">
+            Autonomous Specialist Fleet Status
+          </h3>
         </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-gray-500 font-mono">Stage:</span>
-          <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] font-mono border ${
-            stage === 'COMPLETE' ? 'bg-green-950/60 text-green-400 border-green-800/50 glow-green' :
-            stage === 'REPLANNING' ? 'bg-amber-950/60 text-amber-400 border-amber-800/50 glow-amber animate-pulse' :
-            stage === 'VALIDATION' ? 'bg-purple-950/60 text-purple-400 border-purple-800/50' :
-            stage === 'EXECUTION' ? 'bg-blue-950/60 text-blue-400 border-blue-800/50 glow-blue' :
+
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <span className="text-gray-500">Mission Phase:</span>
+          <span className={`px-2.5 py-0.5 rounded font-bold uppercase tracking-wider text-[10px] font-mono border ${
+            stage === 'COMPLETE' ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700' :
+            stage === 'REPLANNING' ? 'bg-amber-950/80 text-amber-300 border-amber-700 animate-pulse' :
+            stage === 'VALIDATION' ? 'bg-purple-950/80 text-purple-300 border-purple-700' :
+            stage === 'EXECUTION' ? 'bg-blue-950/80 text-blue-300 border-blue-700' :
             'bg-white/[0.03] text-gray-500 border-white/5'
           }`}>
             {stage}
@@ -76,52 +75,87 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
         {agents.map((agent) => {
           const isActive = activeAgent === agent.id;
-          const hasActed = events.some(e => e.agent === agent.id);
+          const agentEvents = events.filter(e => e.agent === agent.id);
+          const hasActed = agentEvents.length > 0;
+          const lastEvent = agentEvents[agentEvents.length - 1];
+
+          const isValidationChallenge = agent.id === 'ValidationAgent' && agentEvents.some(
+            e => e.status === 'WARNING' || e.event_type === 'VALIDATION_FLAG' || e.message.toLowerCase().includes('reject') || e.message.toLowerCase().includes('insufficient')
+          );
+
           const isComplete = stage === 'COMPLETE' && hasActed;
+
+          // Elapsed and tool
+          const toolCall = lastEvent?.tool;
+          const elapsed = lastEvent?.elapsed_seconds ? `+${lastEvent.elapsed_seconds.toFixed(1)}s` : '—';
 
           return (
             <div
               key={agent.id}
-              className={`p-3.5 rounded-xl border transition-all duration-500 relative flex flex-col justify-between ${
+              className={`p-3.5 rounded-xl border transition-all duration-300 relative flex flex-col justify-between ${
                 isActive
-                  ? 'bg-blue-950/30 border-blue-500/40 glow-blue ring-1 ring-blue-500/30 scale-[1.02]'
+                  ? 'bg-blue-950/40 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/60 scale-[1.02]'
+                  : isValidationChallenge && !isComplete
+                  ? 'bg-amber-950/30 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
                   : hasActed
-                  ? 'bg-white/[0.03] border-white/10 shadow-sm'
-                  : 'bg-white/[0.01] border-white/5 opacity-50'
+                  ? 'bg-[#10121b] border-white/10'
+                  : 'bg-[#0e0f16] border-white/5 opacity-60'
               }`}
             >
               <div>
+                {/* Card Top: Icon + Status */}
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`p-1.5 rounded-lg ${isActive ? 'bg-primary/20 text-primary' : 'bg-surface text-gray-400'}`}>
+                  <div className={`p-1.5 rounded-lg ${
+                    isActive ? 'bg-cyan-500/20 text-cyan-400' :
+                    isValidationChallenge && !isComplete ? 'bg-amber-500/20 text-amber-400' :
+                    hasActed ? 'bg-white/[0.04] text-gray-300' :
+                    'bg-white/[0.02] text-gray-600'
+                  }`}>
                     <agent.icon size={16} className={isActive ? 'animate-spin-slow' : ''} />
                   </div>
-                  {isComplete ? (
-                    <CheckCircle2 size={15} className="text-green-400" />
-                  ) : isActive ? (
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+
+                  {/* Status badge */}
+                  {isActive ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-700 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" /> PROCESSING
                     </span>
-                  ) : null}
+                  ) : isValidationChallenge && !isComplete ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700">
+                      <AlertTriangle size={10} /> CHALLENGE
+                    </span>
+                  ) : isComplete ? (
+                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">
+                      <CheckCircle2 size={10} /> COMPLETE
+                    </span>
+                  ) : hasActed ? (
+                    <span className="text-[9px] font-mono text-gray-400 bg-white/[0.04] px-1.5 py-0.5 rounded">
+                      STANDBY
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-mono text-gray-600">
+                      IDLE
+                    </span>
+                  )}
                 </div>
 
-                <div className="font-bold text-sm text-gray-100 tracking-tight">{agent.name}</div>
-                <div className="text-[11px] text-primary/80 font-medium">{agent.role}</div>
-                <div className="text-[10px] text-gray-400 mt-1 font-mono leading-tight">{agent.engine}</div>
+                {/* Name & Role */}
+                <div className="font-bold text-xs text-gray-100 font-mono tracking-tight">{agent.name}</div>
+                <div className="text-[9px] text-cyan-400/90 font-mono font-semibold uppercase">{agent.shortRole}</div>
+                <div className="text-[9px] text-gray-500 font-mono mt-1">{agent.engine}</div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-gray-800/80 flex items-center justify-between text-[10px] font-mono">
-                <span className="text-gray-500">Status</span>
-                {isActive ? (
-                  <span className="text-primary font-bold animate-pulse">PROCESSING</span>
-                ) : hasActed ? (
-                  <span className="text-green-400 font-semibold">STANDBY</span>
-                ) : (
-                  <span className="text-gray-600">IDLE</span>
-                )}
+              {/* Card Bottom: Tool execution & Elapsed */}
+              <div className="mt-3 pt-2 border-t border-white/5 font-mono text-[9px]">
+                <div className="flex items-center justify-between text-gray-400">
+                  <span>Action / Tool:</span>
+                  <span className="text-gray-500">{elapsed}</span>
+                </div>
+                <div className="truncate text-gray-300 font-semibold mt-0.5" title={toolCall || (isActive ? 'Reasoning...' : 'Awaiting dispatch')}>
+                  {toolCall ? `tool: ${toolCall}` : isActive ? 'Gemini 2.5 Multi-turn' : '—'}
+                </div>
               </div>
             </div>
           );

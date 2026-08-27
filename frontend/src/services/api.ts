@@ -40,5 +40,12 @@ export const api = {
     const res = await fetch(`${API_BASE}/incidents/${missionId}/dossier`);
     if (!res.ok) throw new Error(`Failed to fetch dossier for ${missionId}`);
     return res.json();
+  },
+
+  async getHealth(): Promise<{ status: string; gemini_configured?: boolean }> {
+    const rootUrl = API_BASE.replace('/api/v1', '');
+    const res = await fetch(`${rootUrl}/health`);
+    if (!res.ok) throw new Error(`Health check failed at ${rootUrl}`);
+    return res.json();
   }
 };
