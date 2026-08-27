@@ -1,4 +1,4 @@
-import { MapPin, Radio, Activity, Zap, ChevronDown } from 'lucide-react';
+import { Radio, Activity, Zap, ChevronDown } from 'lucide-react';
 import type { ScenarioSummary } from '../types/mission';
 
 interface IncidentPanelProps {
@@ -18,36 +18,41 @@ export function IncidentPanel({
   onTriggerMission,
   missionStatus
 }: IncidentPanelProps) {
-  const current = scenarios.find(s => s.id === selectedScenario) || scenarios[0];
   const isComplete = missionStatus === 'COMPLETE';
 
   return (
-    <div className="bg-[#0b0c12] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
-      {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-white/5 mb-4">
+    <div className="bg-[#0b0c12] border-2 border-red-500/40 rounded-2xl p-6 shadow-[0_0_40px_rgba(239,68,68,0.15)] relative overflow-hidden">
+      {/* Background ambient red glow for active emergency */}
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/10 blur-[130px] pointer-events-none" />
+
+      {/* Top Banner: Incident Title + Sector Selector */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-white/10 mb-5 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-red-500 animate-ping" />
+          <div className="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping shrink-0" />
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-red-400">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-mono font-black uppercase tracking-widest bg-red-500 text-black px-2.5 py-0.5 rounded-full">
                 ACTIVE INFRASTRUCTURE ANOMALY
               </span>
-              <span className="text-[10px] font-mono font-bold bg-red-950/80 text-red-300 border border-red-800 px-2 py-0.2 rounded">
-                PRIORITY: HIGH
+              <span className="text-xs font-mono text-red-400 font-bold">
+                SEISMIC / STRUCTURAL ANOMALY DETECTED
               </span>
             </div>
+            <h2 className="text-xl md:text-2xl font-black text-white font-mono tracking-tight mt-1">
+              BRIDGE PIER P-04 • SAN MATEO BRIDGE • SPAN 14A
+            </h2>
           </div>
         </div>
 
-        {/* Tactical Scenario Switcher */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-gray-500 font-mono uppercase">Target Sector:</span>
+        {/* Sector Switcher */}
+        <div className="flex items-center gap-2 font-mono shrink-0 self-start md:self-auto">
+          <span className="text-[10px] text-gray-400 uppercase">TARGET SECTOR:</span>
           <div className="relative">
             <select
               value={selectedScenario}
               onChange={(e) => onSelectScenario(e.target.value)}
               disabled={isMissionRunning}
-              className="appearance-none bg-[#12141f] border border-white/15 text-gray-200 text-xs rounded-lg pl-3 pr-8 py-1.5 font-mono focus:ring-1 focus:ring-cyan-400 focus:outline-none disabled:opacity-50 cursor-pointer"
+              className="appearance-none bg-[#141624] border border-white/20 text-gray-200 text-xs rounded-lg pl-3 pr-8 py-1.5 font-mono focus:ring-1 focus:ring-red-500 focus:outline-none disabled:opacity-50 cursor-pointer"
             >
               {scenarios.map((sc) => (
                 <option key={sc.id} value={sc.id} className="bg-[#0b0c12]">
@@ -60,94 +65,102 @@ export function IncidentPanel({
         </div>
       </div>
 
-      {/* Hero Incident Dispatch Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-        {/* Left Column (5 cols): Structure Identification & Physical Observations */}
-        <div className="lg:col-span-5 bg-white/[0.02] p-4 rounded-xl border border-white/5 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase font-mono font-bold text-gray-400">
-                Structure Classification
-              </span>
-              <span className="text-[10px] font-mono text-cyan-400 flex items-center gap-1">
-                <MapPin size={11} /> {current?.location || 'San Mateo Bridge Span 14A'}
-              </span>
+      {/* Hero Telemetry + Major CTA Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 relative z-10 items-stretch">
+        
+        {/* Left 8 cols: 4 Large Telemetry Values */}
+        <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3.5 font-mono">
+          
+          {/* Card 1: Microstrain */}
+          <div className="bg-black/50 p-4 rounded-xl border border-white/10 flex flex-col justify-between">
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+              MICROSTRAIN
             </div>
-
-            <h2 className="text-lg font-black text-white font-mono tracking-tight">
-              {current?.name?.replace(' (Recommended Demo)', '') || 'Bridge Pier P-04'}
-            </h2>
-            <div className="text-xs text-gray-300 font-mono mt-0.5">
-              {current?.structure || 'Reinforced Concrete Pier Section (600×600mm)'}
+            <div className="my-2">
+              <div className="text-2xl md:text-3xl font-black text-amber-400 tracking-tight">
+                2,140 <span className="text-xs font-normal text-gray-400">με</span>
+              </div>
+              <div className="text-[10px] text-amber-400/80 font-bold mt-0.5">
+                ● HIGH ANOMALY
+              </div>
             </div>
-
-            {/* Observed damage tags */}
-            <div className="mt-3 pt-3 border-t border-white/5">
-              <div className="text-[10px] uppercase font-mono text-gray-400 font-bold mb-1.5">
-                Physical Damage Observed
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {['SURFACE SPALLING', 'HIGH MICROSTRAIN', 'SEISMIC GROUND ACCEL', 'ACOUSTIC EMISSIONS'].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded bg-red-950/40 text-red-300 border border-red-800/60"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+            <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
+              Piezoelectric sensor #S-14
             </div>
           </div>
 
-          <div className="mt-3 text-[10px] text-gray-400 font-mono flex items-center justify-between pt-2 border-t border-white/5">
-            <span>Status:</span>
-            <span className={`font-bold ${isComplete ? 'text-emerald-400' : isMissionRunning ? 'text-cyan-400 animate-pulse' : 'text-amber-400'}`}>
-              {isComplete ? '● RISK MITIGATED' : isMissionRunning ? '● AUTONOMOUS TRIAGE ACTIVE' : '● AWAITING AUTONOMOUS TRIAGE'}
-            </span>
+          {/* Card 2: Acoustic Emission */}
+          <div className="bg-black/50 p-4 rounded-xl border border-white/10 flex flex-col justify-between">
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+              ACOUSTIC EMISSION
+            </div>
+            <div className="my-2">
+              <div className="text-2xl md:text-3xl font-black text-red-400 tracking-tight">
+                84.5 <span className="text-xs font-normal text-gray-400">dB</span>
+              </div>
+              <div className="text-[10px] text-red-400 font-bold mt-0.5">
+                ● ACTIVE CRACKING
+              </div>
+            </div>
+            <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
+              Ultrasonic wave sensor #A-02
+            </div>
+          </div>
+
+          {/* Card 3: Peak Ground Acceleration */}
+          <div className="bg-black/50 p-4 rounded-xl border border-white/10 flex flex-col justify-between">
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+              GROUND ACCEL (PGA)
+            </div>
+            <div className="my-2">
+              <div className="text-2xl md:text-3xl font-black text-cyan-400 tracking-tight">
+                0.42 <span className="text-xs font-normal text-gray-400">g</span>
+              </div>
+              <div className="text-[10px] text-cyan-400 font-bold mt-0.5">
+                ● SEISMIC RESPONSE
+              </div>
+            </div>
+            <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
+              Tri-axial accelerometer
+            </div>
+          </div>
+
+          {/* Card 4: CURRENT SAFETY FACTOR (HERO CRITICAL) */}
+          <div className="bg-red-950/50 p-4 rounded-xl border-2 border-red-500/80 shadow-[0_0_20px_rgba(239,68,68,0.25)] flex flex-col justify-between">
+            <div className="flex items-center justify-between text-[10px] text-red-300 uppercase font-black tracking-wider">
+              <span>SAFETY FACTOR</span>
+              <span className="bg-red-500 text-black px-1.5 py-0.2 rounded font-mono font-bold">
+                CRITICAL
+              </span>
+            </div>
+            <div className="my-2">
+              <div className="text-3xl md:text-4xl font-black text-red-400 tracking-tight">
+                0.94
+              </div>
+              <div className="text-[10px] text-red-200 font-bold mt-0.5 flex items-center justify-between">
+                <span>REQ: ≥ 1.50</span>
+                <span className="text-red-400 font-black">DEFICIT: −0.56</span>
+              </div>
+            </div>
+            <div className="text-[9px] text-red-300 font-bold pt-1.5 border-t border-red-500/30">
+              Imminent flexural failure
+            </div>
           </div>
         </div>
 
-        {/* Middle Column (4 cols): Sensor Fusion Telemetry */}
-        <div className="lg:col-span-4 bg-white/[0.02] p-4 rounded-xl border border-white/5 flex flex-col justify-between">
+        {/* Right 4 cols: Unmistakable Dominant CTA */}
+        <div className="lg:col-span-4 bg-gradient-to-b from-blue-950/50 via-[#10121d] to-[#0b0c12] p-5 rounded-xl border-2 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.25)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase font-mono font-bold text-gray-400">
-                IoT Sensor Fusion Stream
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-mono uppercase font-black text-cyan-400 tracking-wider">
+                AUTONOMOUS COMMAND CONTROL
               </span>
-              <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
-                <Radio size={10} className="animate-pulse" /> 3 CHANNELS LIVE
+              <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400">
+                <Radio size={9} className="animate-pulse" /> SWARM READY
               </span>
             </div>
-
-            <div className="space-y-2 mt-2 font-mono text-xs">
-              <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
-                <span className="text-gray-400 text-[11px]">Piezoelectric Microstrain</span>
-                <span className="text-amber-400 font-bold">2,140 με</span>
-              </div>
-              <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
-                <span className="text-gray-400 text-[11px]">Acoustic Emission</span>
-                <span className="text-red-400 font-bold">84.5 dB (Active Cracking)</span>
-              </div>
-              <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
-                <span className="text-gray-400 text-[11px]">Seismic Ground Accel (PGA)</span>
-                <span className="text-cyan-400 font-bold">0.42g</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-2 text-[9px] text-gray-500 font-mono">
-            Autonomous fleet reconciles sensor telemetry with non-linear fracture mechanics.
-          </div>
-        </div>
-
-        {/* Right Column (3 cols): Command Action Hero Control */}
-        <div className="lg:col-span-3 bg-gradient-to-b from-blue-950/30 to-[#0c0d14] p-4 rounded-xl border border-cyan-500/30 flex flex-col justify-between">
-          <div>
-            <div className="text-[10px] uppercase font-mono font-bold text-cyan-400 mb-1">
-              Autonomous Dispatch Control
-            </div>
-            <p className="text-[11px] text-gray-300 leading-snug">
-              Triggers Gemini 2.5 Pro multi-turn reasoning with independent validation auditing and adaptive replanning.
+            <p className="text-xs text-gray-300 font-sans leading-relaxed">
+              Triggers autonomous multi-agent triage: Gemini reasoning, deterministic mechanics, independent validation challenge, and adaptive replanning.
             </p>
           </div>
 
@@ -155,20 +168,35 @@ export function IncidentPanel({
             <button
               onClick={onTriggerMission}
               disabled={isMissionRunning}
-              className="w-full group relative flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] text-xs font-mono font-black tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full group relative flex items-center justify-center gap-2 px-5 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-[0_0_30px_rgba(6,182,212,0.4)] text-sm font-mono font-black tracking-widest transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               {isMissionRunning ? (
                 <>
-                  <Activity size={16} className="animate-spin" />
-                  <span>SWARM ACTIVE...</span>
+                  <Activity size={18} className="animate-spin" />
+                  <span>MISSION IN PROGRESS...</span>
+                </>
+              ) : isComplete ? (
+                <>
+                  <Zap size={18} className="text-emerald-300" />
+                  <span>⚡ RE-TRIGGER TRIAGE SWARM</span>
                 </>
               ) : (
                 <>
-                  <Zap size={16} className="text-yellow-300 group-hover:animate-pulse" />
+                  <Zap size={18} className="text-yellow-300 group-hover:animate-pulse" />
                   <span>⚡ INITIATE AUTONOMOUS TRIAGE</span>
                 </>
               )}
             </button>
+
+            <div className="text-[9px] font-mono text-center text-gray-400 mt-2 flex items-center justify-center gap-2 flex-wrap">
+              <span>5 SPECIALIST AGENTS</span>
+              <span>•</span>
+              <span className="text-blue-400">GEMINI REASONING</span>
+              <span>•</span>
+              <span className="text-emerald-400">DETERMINISTIC PHYSICS</span>
+              <span>•</span>
+              <span className="text-purple-400">INDEPENDENT VALIDATION</span>
+            </div>
           </div>
         </div>
       </div>

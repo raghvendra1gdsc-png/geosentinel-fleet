@@ -35,6 +35,22 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
     }
   };
 
+  const getSeverityBadge = (event: MissionEvent) => {
+    if (event.event_type === 'VALIDATION_FLAG' || event.status === 'WARNING' || event.message.toLowerCase().includes('insufficient') || event.message.toLowerCase().includes('reject')) {
+      return { label: 'CHALLENGE', color: 'bg-red-500 text-black font-black' };
+    }
+    if (event.event_type === 'REPLANNING' || event.message.toLowerCase().includes('replan')) {
+      return { label: 'REPLAN', color: 'bg-amber-500 text-black font-black' };
+    }
+    if (event.stage === 'COMPLETE' || event.status === 'PASSED' || event.message.toLowerCase().includes('meets target') || event.message.toLowerCase().includes('verified')) {
+      return { label: 'SUCCESS', color: 'bg-emerald-500 text-black font-black' };
+    }
+    if (event.tool) {
+      return { label: 'EXEC', color: 'bg-cyan-950 text-cyan-300 border border-cyan-700 font-bold' };
+    }
+    return { label: 'INFO', color: 'bg-white/[0.05] text-gray-400 border border-white/10 font-bold' };
+  };
+
   return (
     <div className="bg-[#0b0c12] border border-white/10 rounded-2xl shadow-2xl flex flex-col h-[560px] relative overflow-hidden">
       {/* Terminal Title Bar */}
@@ -74,40 +90,41 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
               Click &quot;⚡ INITIATE AUTONOMOUS TRIAGE&quot; to begin live multi-agent reasoning, physics execution, and validation checks.
             </p>
 
-            <div className="mt-4 p-2.5 rounded-lg bg-black/40 border border-white/5 text-left text-[10px] text-gray-500 space-y-1 w-full max-w-xs">
+            <div className="mt-4 p-2.5 rounded-lg bg-black/40 border border-white/5 text-left text-[10px] text-gray-500 space-y-1 w-full max-w-xs font-mono">
               <div className="text-gray-400 font-bold">EXPECTED SWARM CADENCE:</div>
-              <div>00:00.0 COMMANDER → Classification & Dispatch</div>
-              <div>00:01.8 STRUCTURAL → ACI 318 Shear Capacity</div>
-              <div>00:03.2 VALIDATION → Objection (Shear Inconclusive)</div>
-              <div>00:04.5 COMMANDER → Replan: OpenSeesPy FEA</div>
-              <div>00:06.8 RETROFIT → 3-Ply CFRP Composite Design</div>
-              <div>00:08.4 VALIDATION → Final Safety Verified (SF ≥ 1.50)</div>
+              <div>00:00.0 COMMANDER [INFO] → Dispatch</div>
+              <div>00:01.8 STRUCTURAL [EXEC] → ACI 318 Shear</div>
+              <div>00:03.2 VALIDATION [CHALLENGE] → Objection</div>
+              <div>00:04.5 COMMANDER [REPLAN] → OpenSeesPy FEA</div>
+              <div>00:06.8 RETROFIT [EXEC] → 3-Ply CFRP Design</div>
+              <div>00:08.4 VALIDATION [SUCCESS] → Verified (SF ≥ 1.50)</div>
             </div>
           </div>
         ) : (
           events.map((event, idx) => {
             const badge = getAgentBadge(event.agent);
+            const severity = getSeverityBadge(event);
             const isExpanded = !!expandedItems[event.event_id || idx.toString()];
             const hasData = event.tool_input || event.tool_output;
 
-            const isWarning = event.status === 'WARNING' || event.event_type === 'VALIDATION_FLAG';
-            const isReplan = event.event_type === 'REPLANNING';
-            const isComplete = event.stage === 'COMPLETE';
+            const isWarning = severity.label === 'CHALLENGE';
+            const isReplan = severity.label === 'REPLAN';
+            const isComplete = severity.label === 'SUCCESS';
 
             const timeStr = event.elapsed_seconds !== undefined
               ? `+${event.elapsed_seconds.toFixed(1)}s`
-              : (event.timestamp ? event.timestamp.split('T')[1]?.substring(0, 8) : `+${idx * 1.2}s`);
+              : (event.timestamp ? event.timestamp.split('T')[1]?.substring(0, 8) : `+${(idx * 1.2).toFixed(1)}s`);
 
             return (
               <div
                 key={event.event_id || idx}
                 className={`p-2.5 rounded-xl border transition-all duration-200 ${
                   isWarning
-                    ? 'bg-amber-950/30 border-amber-600/80 text-amber-200'
+                    ? 'bg-red-950/30 border-red-500/80 text-red-200 shadow-[0_0_15px_rgba(239,68,68,0.15)]'
                     : isReplan
-                    ? 'bg-orange-950/30 border-orange-500/80 text-orange-200'
+                    ? 'bg-amber-950/30 border-amber-500/80 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
                     : isComplete
-                    ? 'bg-emerald-950/30 border-emerald-600/80 text-emerald-200'
+                    ? 'bg-emerald-950/30 border-emerald-500/80 text-emerald-200'
                     : 'bg-black/30 border-white/5 hover:border-white/15 text-gray-200'
                 }`}
               >
@@ -115,11 +132,11 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
                 <div className="flex items-center justify-between gap-2 mb-1 flex-wrap text-[10px]">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 font-mono">{timeStr}</span>
+                    <span className={`px-1.5 py-0.2 rounded font-mono ${severity.color}`}>
+                      {severity.label}
+                    </span>
                     <span className={`px-1.5 py-0.2 rounded border font-bold ${badge.color}`}>
                       {badge.label}
-                    </span>
-                    <span className="text-gray-500 font-mono">
-                      [{event.stage}]
                     </span>
                   </div>
 
@@ -132,14 +149,11 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
 
                 {/* Event Message */}
                 <div className={`text-xs leading-relaxed ${
-                  isWarning ? 'font-semibold text-amber-300' :
-                  isReplan ? 'font-semibold text-orange-300' :
+                  isWarning ? 'font-semibold text-red-300' :
+                  isReplan ? 'font-semibold text-amber-300' :
                   isComplete ? 'font-semibold text-emerald-300' :
                   'text-gray-300 font-mono'
                 }`}>
-                  {isWarning && <span className="text-amber-400 mr-1 font-bold">[OBJECTION]</span>}
-                  {isReplan && <span className="text-orange-400 mr-1 font-bold">[REPLAN]</span>}
-                  {isComplete && <span className="text-emerald-400 mr-1 font-bold">[VERIFIED]</span>}
                   {event.message}
                 </div>
 

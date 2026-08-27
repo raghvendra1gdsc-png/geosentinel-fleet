@@ -1,4 +1,4 @@
-import { Search, Brain, Activity, ShieldAlert, RotateCw, Wrench, ShieldCheck } from 'lucide-react';
+import { Search, Brain, Activity, ShieldAlert, RotateCw, Wrench, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 interface MissionPipelineProps {
   stage: string;
@@ -17,16 +17,18 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
       id: 'DETECT',
       label: 'DETECT',
       subtext: 'IoT Sensor Fusion',
+      agentTag: 'Piezo/Acoustic',
       icon: Search,
       agent: 'Incident',
-      isActive: isStarted,
-      isDone: isStarted,
+      isActive: isStarted && eventsCount < 2,
+      isDone: eventsCount >= 1,
       color: 'blue'
     },
     {
       id: 'REASON',
       label: 'REASON',
       subtext: 'Gemini 2.5 Pro',
+      agentTag: 'Commander',
       icon: Brain,
       agent: 'Commander',
       isActive: activeAgent === 'Commander' || stage === 'PLANNING',
@@ -36,7 +38,8 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
     {
       id: 'INVESTIGATE',
       label: 'INVESTIGATE',
-      subtext: 'NumPy Mechanics',
+      subtext: 'ACI 318 Mechanics',
+      agentTag: 'StructuralAgent',
       icon: Activity,
       agent: 'StructuralAgent',
       isActive: activeAgent === 'StructuralAgent',
@@ -46,7 +49,8 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
     {
       id: 'CHALLENGE',
       label: 'CHALLENGE',
-      subtext: 'Evidence Audit',
+      subtext: 'Independent Audit',
+      agentTag: 'ValidationAgent',
       icon: ShieldAlert,
       agent: 'ValidationAgent',
       isActive: isValidation || activeAgent === 'ValidationAgent',
@@ -57,6 +61,7 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
       id: 'REPLAN',
       label: 'REPLAN',
       subtext: 'OpenSeesPy FEA',
+      agentTag: 'SimulationAgent',
       icon: RotateCw,
       agent: 'SimulationAgent',
       isActive: isReplanning || activeAgent === 'SimulationAgent',
@@ -67,6 +72,7 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
       id: 'MITIGATE',
       label: 'MITIGATE',
       subtext: 'CFRP Optimizer',
+      agentTag: 'RetrofitAgent',
       icon: Wrench,
       agent: 'RetrofitAgent',
       isActive: activeAgent === 'RetrofitAgent',
@@ -77,6 +83,7 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
       id: 'VERIFY',
       label: 'VERIFY',
       subtext: 'Safety Factor ≥ 1.50',
+      agentTag: 'ValidationAudit',
       icon: ShieldCheck,
       agent: 'ValidationAgent',
       isActive: isComplete,
@@ -86,83 +93,88 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
   ];
 
   return (
-    <div className="bg-[#0c0d14] border border-white/10 rounded-xl p-3.5 shadow-xl relative overflow-hidden">
-      {/* Background technical grid accent */}
+    <div className="bg-[#0b0c12] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+      {/* Background Accent */}
       <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
 
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 relative z-10">
-        {/* Left header tag */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <div>
-            <div className="text-[10px] font-mono font-bold tracking-wider uppercase text-cyan-400">
-              AUTONOMOUS MISSION PIPELINE
-            </div>
-            <div className="text-[9px] text-gray-500 font-mono">
-              Hypothesis Driven • Physics Enforced
-            </div>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/5 mb-4 relative z-10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+          <h3 className="text-xs font-mono font-black uppercase tracking-wider text-white">
+            AUTONOMOUS MISSION PIPELINE
+          </h3>
+          <span className="text-[9px] font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.2 rounded hidden sm:inline-block">
+            ACTIVE FLOW
+          </span>
         </div>
 
-        {/* The 7 Steps */}
-        <div className="flex items-center justify-between gap-1 overflow-x-auto pb-1 lg:pb-0 flex-1 max-w-4xl">
-          {steps.map((step, idx) => {
-            const Icon = step.icon;
-            const isCurrent = step.isActive && !isComplete;
-            const isPassed = step.isDone;
+        <div className="text-[10px] font-mono text-gray-400 flex items-center gap-2">
+          <span>7 AUTONOMOUS PHASES</span>
+          <span>•</span>
+          <span className={isComplete ? "text-emerald-400 font-bold" : isStarted ? "text-cyan-400 font-bold animate-pulse" : "text-gray-500"}>
+            {isComplete ? 'ALL PHASES VERIFIED' : isStarted ? 'TRIAGE PROGRESSING' : 'STANDBY'}
+          </span>
+        </div>
+      </div>
 
-            return (
-              <div key={step.id} className="flex items-center gap-1 shrink-0">
-                <div
-                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all duration-300 ${
-                    isCurrent
-                      ? 'bg-blue-950/80 border-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.3)] ring-1 ring-cyan-400/50'
-                      : isPassed
-                      ? 'bg-white/[0.04] border-white/15 text-gray-300'
-                      : 'bg-white/[0.01] border-white/5 text-gray-600 opacity-60'
-                  }`}
-                >
-                  <Icon
-                    size={13}
-                    className={
-                      isCurrent
-                        ? 'text-cyan-400 animate-pulse'
-                        : isPassed
-                        ? 'text-emerald-400'
-                        : 'text-gray-600'
-                    }
-                  />
-                  <div className="text-left font-mono">
-                    <div
-                      className={`text-[10px] font-bold tracking-wider ${
-                        isCurrent
-                          ? 'text-cyan-300'
-                          : isPassed
-                          ? 'text-gray-200'
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      {step.label}
-                    </div>
-                    <div className="text-[8px] text-gray-400 whitespace-nowrap">
-                      {step.subtext}
-                    </div>
-                  </div>
+      {/* The 7 Interactive Timeline Steps */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 relative z-10 font-mono">
+        {steps.map((step, idx) => {
+          const Icon = step.icon;
+          const isCurrent = step.isActive && !isComplete;
+          const isPassed = step.isDone;
+
+          return (
+            <div
+              key={step.id}
+              className={`p-3 rounded-xl border transition-all duration-300 flex flex-col justify-between relative ${
+                isCurrent
+                  ? 'bg-blue-950/80 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400/80 scale-[1.02]'
+                  : isPassed
+                  ? 'bg-emerald-950/20 border-emerald-500/40 shadow-sm'
+                  : 'bg-black/30 border-white/5 opacity-50'
+              }`}
+            >
+              <div>
+                {/* Step Top */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[9px] font-black tracking-widest ${
+                    isCurrent ? 'text-cyan-400' : isPassed ? 'text-emerald-400' : 'text-gray-500'
+                  }`}>
+                    0{idx + 1}
+                  </span>
+
+                  {isPassed ? (
+                    <CheckCircle2 size={13} className="text-emerald-400" />
+                  ) : (
+                    <Icon
+                      size={13}
+                      className={isCurrent ? 'text-cyan-400 animate-pulse' : 'text-gray-600'}
+                    />
+                  )}
                 </div>
 
-                {idx < steps.length - 1 && (
-                  <span
-                    className={`text-[10px] px-0.5 font-mono ${
-                      isPassed ? 'text-cyan-500/70' : 'text-gray-700'
-                    }`}
-                  >
-                    →
-                  </span>
-                )}
+                {/* Step Name */}
+                <div className={`text-xs font-black tracking-tight ${
+                  isCurrent ? 'text-cyan-300' : isPassed ? 'text-white' : 'text-gray-400'
+                }`}>
+                  {step.label}
+                </div>
+
+                {/* Step Subtext */}
+                <div className="text-[10px] text-gray-300 font-sans mt-0.5 leading-snug">
+                  {step.subtext}
+                </div>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Responsible Tool/Agent Tag */}
+              <div className="mt-2.5 pt-1.5 border-t border-white/5 text-[9px] text-gray-400 truncate">
+                {step.agentTag}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
