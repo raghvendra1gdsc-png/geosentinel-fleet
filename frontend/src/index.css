@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @theme {
-  --color-background: #09090b;
-  --color-surface: #141417;
-  --color-surfaceHighlight: #202024;
+  --color-background: #050507;
+  --color-surface: #0c0c10;
+  --color-surfaceHighlight: #16161d;
   --color-primary: #3b82f6;
   --color-success: #10b981;
   --color-warning: #f59e0b;
@@ -13,7 +14,186 @@
 body {
   background-color: var(--color-background);
   color: #e4e4e7;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Animated background grid */
+/* ═══════════════════════════════════════════════════ */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Glow effects */
+/* ═══════════════════════════════════════════════════ */
+.glow-blue {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.15), 0 0 60px rgba(59, 130, 246, 0.05);
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15), 0 0 40px rgba(245, 158, 11, 0.05);
+}
+
+.glow-green {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 40px rgba(16, 185, 129, 0.05);
+}
+
+.glow-danger {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), 0 0 40px rgba(239, 68, 68, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Animated gradient border */
+/* ═══════════════════════════════════════════════════ */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(139, 92, 246, 0.3), rgba(16, 185, 129, 0.3));
+  z-index: -1;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Animated radar sweep for idle agent cards */
+/* ═══════════════════════════════════════════════════ */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.radar-sweep {
+  animation: radar-sweep 4s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Pulse ring for live indicators */
+/* ═══════════════════════════════════════════════════ */
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Slow spin for agent icons */
+/* ═══════════════════════════════════════════════════ */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Slide-in animation for events */
+/* ═══════════════════════════════════════════════════ */
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up-fade 0.35s ease-out forwards;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Typing animation for idle/loading text */
+/* ═══════════════════════════════════════════════════ */
+@keyframes blink-cursor {
+  50% { border-color: transparent; }
+}
+
+.cursor-blink {
+  border-right: 2px solid #3b82f6;
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Scrollbar */
+/* ═══════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Glass panels */
+/* ═══════════════════════════════════════════════════ */
+.glass {
+  background: rgba(12, 12, 16, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Mono font shortcut */
+/* ═══════════════════════════════════════════════════ */
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Structural wireframe animation for idle states */
+/* ═══════════════════════════════════════════════════ */
+@keyframes structural-scan {
+  0%, 100% { stroke-dashoffset: 0; }
+  50% { stroke-dashoffset: 200; }
+}
+
+.structural-scan-line {
+  stroke-dasharray: 200;
+  animation: structural-scan 6s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* Shimmer effect for placeholder content */
+/* ═══════════════════════════════════════════════════ */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(59, 130, 246, 0.05) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease infinite;
 }

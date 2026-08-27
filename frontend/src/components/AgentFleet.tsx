@@ -52,19 +52,24 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
   ];
 
   return (
-    <div className="bg-surface rounded-xl p-5 border border-surfaceHighlight shadow-xl">
+    <div className="bg-surface rounded-2xl p-5 border border-white/5 shadow-2xl">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 font-mono">
-          <Cpu size={15} className="text-primary" /> Autonomous Specialist Fleet
-        </h2>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+            <Cpu size={14} className="text-blue-400" />
+          </div>
+          <h2 className="text-xs font-bold text-gray-300 uppercase tracking-wider font-mono">
+            Autonomous Specialist Fleet
+          </h2>
+        </div>
         <div className="flex items-center gap-2 text-xs">
           <span className="text-gray-500 font-mono">Stage:</span>
           <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] font-mono border ${
-            stage === 'COMPLETE' ? 'bg-green-950/60 text-green-400 border-green-800' :
-            stage === 'REPLANNING' ? 'bg-amber-950/60 text-amber-400 border-amber-800 animate-pulse' :
-            stage === 'VALIDATION' ? 'bg-purple-950/60 text-purple-400 border-purple-800' :
-            stage === 'EXECUTION' ? 'bg-blue-950/60 text-blue-400 border-blue-800' :
-            'bg-gray-800 text-gray-400 border-gray-700'
+            stage === 'COMPLETE' ? 'bg-green-950/60 text-green-400 border-green-800/50 glow-green' :
+            stage === 'REPLANNING' ? 'bg-amber-950/60 text-amber-400 border-amber-800/50 glow-amber animate-pulse' :
+            stage === 'VALIDATION' ? 'bg-purple-950/60 text-purple-400 border-purple-800/50' :
+            stage === 'EXECUTION' ? 'bg-blue-950/60 text-blue-400 border-blue-800/50 glow-blue' :
+            'bg-white/[0.03] text-gray-500 border-white/5'
           }`}>
             {stage}
           </span>
@@ -80,12 +85,12 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
           return (
             <div
               key={agent.id}
-              className={`p-3.5 rounded-xl border transition-all duration-300 relative flex flex-col justify-between ${
+              className={`p-3.5 rounded-xl border transition-all duration-500 relative flex flex-col justify-between ${
                 isActive
-                  ? 'bg-blue-950/40 border-primary shadow-[0_0_20px_rgba(59,130,246,0.3)] ring-1 ring-primary'
+                  ? 'bg-blue-950/30 border-blue-500/40 glow-blue ring-1 ring-blue-500/30 scale-[1.02]'
                   : hasActed
-                  ? 'bg-surfaceHighlight/70 border-gray-700/80 shadow-sm'
-                  : 'bg-surface/60 border-surfaceHighlight/50 opacity-40'
+                  ? 'bg-white/[0.03] border-white/10 shadow-sm'
+                  : 'bg-white/[0.01] border-white/5 opacity-50'
               }`}
             >
               <div>

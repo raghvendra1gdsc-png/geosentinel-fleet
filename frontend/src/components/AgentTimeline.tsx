@@ -36,25 +36,42 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
   };
 
   return (
-    <div className="bg-surface rounded-xl border border-surfaceHighlight shadow-xl flex flex-col h-[520px]">
-      <div className="p-4 border-b border-surfaceHighlight bg-surfaceHighlight/40 flex items-center justify-between">
+    <div className="bg-surface rounded-2xl border border-white/5 shadow-2xl flex flex-col h-[520px]">
+      <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Terminal size={16} className="text-primary" />
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+            <Terminal size={14} className="text-blue-400" />
+          </div>
           <h2 className="text-xs font-bold text-gray-300 uppercase tracking-wider font-mono">
             Live Swarm Activity Stream
           </h2>
         </div>
         <div className="flex items-center gap-2 text-[10px] font-mono text-gray-500">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
-          <span>{events.length} EVENTS RECORDED</span>
+          {events.length > 0 && <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />}
+          <span>{events.length} EVENTS</span>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans">
         {events.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-500 text-sm gap-2">
-            <Terminal size={24} className="text-gray-600 animate-pulse" />
-            <p>Awaiting incident trigger to deploy fleet...</p>
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 relative">
+            <div className="absolute inset-0 shimmer opacity-30" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 flex items-center justify-center mb-4">
+              <Terminal size={24} className="text-blue-400/60" />
+            </div>
+            <h3 className="text-sm font-bold text-gray-300 mb-1">Swarm Awaiting Deployment</h3>
+            <p className="text-xs text-gray-500 max-w-xs leading-relaxed mb-4">
+              Select a scenario and trigger the mission to observe real-time multi-agent reasoning, validation objections, and adaptive replanning.
+            </p>
+            {/* Preview of what the timeline will show */}
+            <div className="w-full max-w-xs space-y-2 opacity-40">
+              {['Commander → Hypothesis Formation', 'StructuralAgent → Shear Analysis', 'ValidationAgent → Evidence Audit', 'Commander → Adaptive Replan', 'RetrofitAgent → CFRP Design'].map((step, i) => (
+                <div key={i} className="flex items-center gap-2 text-[10px] font-mono text-gray-600">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-700" />
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           events.map((event, idx) => {

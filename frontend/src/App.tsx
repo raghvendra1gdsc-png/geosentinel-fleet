@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Play, Download, RotateCcw, Radio } from 'lucide-react';
+import { ShieldAlert, Download, RotateCcw, Radio, Zap, Globe, Activity } from 'lucide-react';
 import type { MissionEvent, MissionState, ScenarioSummary } from './types/mission';
 import { WebSocketClient } from './services/websocket';
 import { api } from './services/api';
@@ -127,74 +127,127 @@ function App() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#09090b] text-gray-200 p-4 sm:p-6 font-sans selection:bg-primary/30 selection:text-white">
-      <div className="max-w-7xl mx-auto space-y-5">
+  const isMissionRunning = missionStatus !== 'IDLE' && missionStatus !== 'COMPLETE' && missionStatus !== 'FAILED';
 
-        {/* Top Header Bar */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between bg-surface p-5 rounded-2xl border border-surfaceHighlight shadow-2xl gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <ShieldAlert size={26} />
+  return (
+    <div className="min-h-screen bg-[#050507] bg-grid-pattern text-gray-200 selection:bg-primary/30 selection:text-white">
+
+      {/* ═══════════════ HERO HEADER ═══════════════ */}
+      <header className="relative overflow-hidden border-b border-white/5">
+        {/* Ambient gradient blobs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Left: Brand */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 ring-1 ring-white/10">
+                  <ShieldAlert size={28} />
+                </div>
+                {/* Pulse ring */}
+                {isMissionRunning && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500" />
+                  </span>
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl font-black text-white tracking-tight">
+                    GeoSentinel Fleet
+                  </h1>
+                  <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-blue-950/80 to-indigo-950/80 text-blue-300 border border-blue-700/50 px-2.5 py-0.5 rounded-full">
+                    v1.0 • Hackathon
+                  </span>
+                  <span className={`flex items-center gap-1.5 text-[10px] font-mono font-semibold border px-2.5 py-0.5 rounded-full transition-all ${
+                    wsConnected
+                      ? 'text-emerald-300 bg-emerald-950/60 border-emerald-700/50 glow-green'
+                      : 'text-gray-400 bg-gray-900/60 border-gray-700'
+                  }`}>
+                    <Radio size={10} className={wsConnected ? "animate-pulse" : ""} />
+                    {wsConnected ? 'WS LIVE' : 'CONNECTING'}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1 max-w-lg leading-relaxed">
+                  Autonomous Multi-Agent Infrastructure Emergency Response — Powered by <span className="text-blue-400 font-semibold">Google Gemini 2.5 Pro</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-xl font-black text-white tracking-tight font-sans">
-                  GeoSentinel Fleet
-                </h1>
-                <span className="text-[10px] font-mono font-bold bg-blue-950/80 text-blue-400 border border-blue-800 px-2 py-0.5 rounded-full">
-                  v1.0 • Hackathon Edition
+
+            {/* Right: Action buttons */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {events.length > 0 && missionStatus === 'COMPLETE' && (
+                <>
+                  <button
+                    onClick={() => setIsReplaying(!isReplaying)}
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-mono font-semibold border border-white/10 transition-all hover:border-white/20"
+                  >
+                    <RotateCcw size={14} className="text-cyan-400" />
+                    <span>{isReplaying ? 'Live View' : 'Replay Mission'}</span>
+                  </button>
+
+                  <button
+                    onClick={downloadDossier}
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-gray-200 rounded-xl text-xs font-mono font-semibold border border-white/10 transition-all hover:border-white/20"
+                  >
+                    <Download size={14} className="text-green-400" />
+                    <span>Audit Dossier</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={triggerMission}
+                disabled={isMissionRunning}
+                className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-lg shadow-blue-600/25 text-xs font-bold font-mono tracking-wider transition-all hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isMissionRunning ? (
+                  <Activity size={14} className="animate-spin-slow" />
+                ) : (
+                  <Zap size={14} className="group-hover:animate-pulse" />
+                )}
+                <span>
+                  {isMissionRunning
+                    ? 'MISSION IN PROGRESS...'
+                    : 'TRIGGER ANOMALY TRIAGE'}
                 </span>
-                <span className={`flex items-center gap-1 text-[10px] font-mono border px-2 py-0.5 rounded-full ${
-                  wsConnected
-                    ? 'text-green-400 bg-green-950/60 border-green-800'
-                    : 'text-gray-400 bg-gray-900 border-gray-700'
-                }`}>
-                  <Radio size={10} className={wsConnected ? "animate-pulse" : ""} /> {wsConnected ? 'WS LIVE' : 'WS CONNECTING'}
+              </button>
+            </div>
+          </div>
+
+          {/* Live Stats Bar (during or after mission) */}
+          {(events.length > 0 || isMissionRunning) && (
+            <div className="mt-4 flex items-center gap-4 text-[10px] font-mono text-gray-400">
+              <div className="flex items-center gap-1.5">
+                <Globe size={11} className="text-blue-400" />
+                <span>{events.length} events streamed</span>
+              </div>
+              <span className="text-gray-700">|</span>
+              <div className="flex items-center gap-1.5">
+                <Activity size={11} className={isMissionRunning ? "text-amber-400 animate-pulse" : "text-emerald-400"} />
+                <span className={isMissionRunning ? "text-amber-400" : "text-emerald-400"}>
+                  {missionStatus}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Autonomous Multi-Agent Infrastructure Emergency Response & Deterministic Physics Verification
-              </p>
+              {missionState?.initial_safety_factor && (
+                <>
+                  <span className="text-gray-700">|</span>
+                  <span>Pre-SF: <strong className="text-amber-400">{missionState.initial_safety_factor}</strong></span>
+                  {missionState.post_retrofit_safety_factor && (
+                    <span>→ Post-SF: <strong className="text-emerald-400">{missionState.post_retrofit_safety_factor}</strong></span>
+                  )}
+                </>
+              )}
             </div>
-          </div>
+          )}
+        </div>
+      </header>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-3 flex-wrap">
-            {events.length > 0 && missionStatus === 'COMPLETE' && (
-              <>
-                <button
-                  onClick={() => setIsReplaying(!isReplaying)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-surfaceHighlight hover:bg-gray-800 text-gray-200 rounded-xl text-xs font-mono font-semibold border border-gray-700 transition-colors"
-                >
-                  <RotateCcw size={14} className="text-primary" />
-                  <span>{isReplaying ? 'Live View' : 'Replay Mission'}</span>
-                </button>
-
-                <button
-                  onClick={downloadDossier}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-surfaceHighlight hover:bg-gray-800 text-gray-200 rounded-xl text-xs font-mono font-semibold border border-gray-700 transition-colors"
-                >
-                  <Download size={14} className="text-green-400" />
-                  <span>Audit Dossier</span>
-                </button>
-              </>
-            )}
-
-            <button
-              onClick={triggerMission}
-              disabled={missionStatus === 'PLANNING' || missionStatus === 'EXECUTION' || missionStatus === 'VALIDATION' || missionStatus === 'REPLANNING' || missionStatus === 'RETROFIT'}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-lg shadow-blue-600/30 text-xs font-bold font-mono tracking-wider transition-all"
-            >
-              <Play size={14} />
-              <span>
-                {missionStatus !== 'IDLE' && missionStatus !== 'COMPLETE' && missionStatus !== 'FAILED'
-                  ? 'MISSION IN PROGRESS...'
-                  : 'TRIGGER ANOMALY TRIAGE'}
-              </span>
-            </button>
-          </div>
-        </header>
+      {/* ═══════════════ MAIN CONTENT ═══════════════ */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
 
         {/* Hackathon Judge Highlight Banner */}
         <WhyAgenticPanel />
@@ -204,7 +257,7 @@ function App() {
           scenarios={scenarios}
           selectedScenario={selectedScenario}
           onSelectScenario={(id) => setSelectedScenario(id)}
-          isMissionRunning={missionStatus !== 'IDLE' && missionStatus !== 'COMPLETE' && missionStatus !== 'FAILED'}
+          isMissionRunning={isMissionRunning}
         />
 
         {/* Mission Replay Controls (when active) */}
@@ -240,8 +293,15 @@ function App() {
           missionState={missionState}
           onDownloadDossier={downloadDossier}
         />
+      </main>
 
-      </div>
+      {/* Footer */}
+      <footer className="border-t border-white/5 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-[10px] font-mono text-gray-600">
+          <span>GeoSentinel Fleet v1.0 • Google All Things Agentic Hackathon 2026</span>
+          <span>Gemini 2.5 Pro • NumPy • OpenSeesPy • ACI 318 / ASCE 41 / ACI 440.2R</span>
+        </div>
+      </footer>
     </div>
   );
 }
