@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Zap, Clock } from 'lucide-react';
+import { Zap, Clock, Sparkles } from 'lucide-react';
 import { AnimatedNumber } from './AnimatedNumber';
 import type { MissionEvent } from '../types/mission';
 
@@ -9,8 +9,7 @@ interface HeroStatProps {
 }
 
 /**
- * Prominent comparison callout: autonomous triage time vs manual engineering assessment.
- * Only visible after mission has started.
+ * Apple Pro comparison banner: autonomous triage elapsed time vs manual engineering turnaround.
  */
 export function HeroStat({ events, stage }: HeroStatProps) {
   if (stage === 'IDLE') return null;
@@ -23,77 +22,79 @@ export function HeroStat({ events, stage }: HeroStatProps) {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`relative overflow-hidden rounded-2xl border p-4 font-mono transition-all duration-500 ${
+      transition={{ duration: 0.4 }}
+      className={`relative overflow-hidden rounded-2xl p-5 transition-all duration-500 border ${
         isComplete
-          ? 'bg-gradient-to-r from-emerald-950/60 via-[#0b0c12] to-cyan-950/40 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.15)]'
-          : 'bg-gradient-to-r from-cyan-950/40 via-[#0b0c12] to-blue-950/40 border-cyan-500/30'
+          ? 'bg-gradient-to-r from-emerald-950/40 via-black to-cyan-950/30 border-emerald-500/30 shadow-[0_8px_32px_rgba(48,209,88,0.15)]'
+          : 'apple-glass-card'
       }`}
     >
-      {/* Glow accent */}
-      <div className="absolute top-0 left-0 w-64 h-full bg-gradient-to-r from-cyan-500/5 to-transparent pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
         {/* Left: Autonomous time */}
         <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-xl border ${
+          <div className={`p-3.5 rounded-2xl border ${
             isComplete
-              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
-              : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(48,209,88,0.2)]'
+              : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(41,151,255,0.2)]'
           }`}>
-            <Zap size={24} />
+            <Zap size={22} className={isComplete ? "text-emerald-400" : "text-cyan-400"} />
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">
-              Autonomous Triage Elapsed
+            <div className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">
+              Autonomous Swarm Elapsed
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className={`text-3xl font-black tracking-tight ${isComplete ? 'text-emerald-400' : 'text-cyan-300'}`}>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className={`text-4xl font-black font-mono tracking-tight ${isComplete ? 'text-emerald-400' : 'text-cyan-400'}`}>
                 <AnimatedNumber value={elapsedSeconds} decimals={1} />
               </span>
-              <span className="text-sm text-gray-400 font-bold">seconds</span>
+              <span className="text-sm text-slate-400 font-medium">seconds</span>
             </div>
           </div>
         </div>
 
         {/* Center: VS divider */}
         <div className="flex items-center gap-3">
-          <div className="h-px w-8 bg-white/10 hidden sm:block" />
-          <span className="text-xs font-black text-gray-500 uppercase tracking-widest">vs</span>
-          <div className="h-px w-8 bg-white/10 hidden sm:block" />
+          <div className="h-px w-12 bg-white/[0.08] hidden md:block" />
+          <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/[0.04]">
+            VS
+          </span>
+          <div className="h-px w-12 bg-white/[0.08] hidden md:block" />
         </div>
 
         {/* Right: Manual reference */}
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-gray-500">
-            <Clock size={24} />
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-slate-500">
+            <Clock size={22} />
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">
-              Manual Engineering Assessment
+            <div className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">
+              Traditional Human Engineering Triage
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-black tracking-tight text-gray-500">
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-4xl font-black font-mono tracking-tight text-slate-500">
                 3–6
               </span>
-              <span className="text-sm text-gray-400 font-bold">weeks</span>
+              <span className="text-sm text-slate-400 font-medium">weeks</span>
             </div>
           </div>
         </div>
 
-        {/* Speed multiplier badge */}
+        {/* Speed multiplier pill */}
         {isComplete && (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-            className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-center hidden lg:block"
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="px-5 py-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center hidden lg:flex items-center gap-3"
           >
-            <div className="text-2xl font-black text-emerald-400 tracking-tight">
-              ~18,000×
-            </div>
-            <div className="text-[9px] text-emerald-300/80 font-bold uppercase tracking-wider">
-              Faster
+            <Sparkles size={18} className="text-emerald-400" />
+            <div className="text-left">
+              <div className="text-xl font-black text-emerald-400 font-mono tracking-tight leading-none">
+                ~18,000×
+              </div>
+              <div className="text-[9px] text-emerald-300 font-bold uppercase tracking-wider mt-0.5">
+                Faster Turnaround
+              </div>
             </div>
           </motion.div>
         )}

@@ -18,7 +18,6 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
       shortRole: 'SWARM COORDINATOR',
       engine: 'Google Gemini 2.5 Pro',
       icon: Cpu,
-      color: 'blue'
     },
     {
       id: 'StructuralAgent',
@@ -26,7 +25,6 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
       shortRole: 'CONCRETE MECHANICS',
       engine: 'NumPy ACI 318-19 / ASCE 41',
       icon: Activity,
-      color: 'emerald'
     },
     {
       id: 'SimulationAgent',
@@ -34,7 +32,6 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
       shortRole: 'FIBER FEA SOLVER',
       engine: 'OpenSeesPy v3.8 Engine',
       icon: RefreshCw,
-      color: 'cyan'
     },
     {
       id: 'RetrofitAgent',
@@ -42,7 +39,6 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
       shortRole: 'CFRP DESIGN OPTIMIZER',
       engine: 'ACI 440.2R Solver',
       icon: Wrench,
-      color: 'purple'
     },
     {
       id: 'ValidationAgent',
@@ -50,7 +46,6 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
       shortRole: 'INDEPENDENT AUDITOR',
       engine: 'Isolated Safety Gate',
       icon: ShieldCheck,
-      color: 'amber'
     },
   ];
 
@@ -59,30 +54,30 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
   );
 
   return (
-    <div className="bg-[#0b0c12] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden" data-fleet-container>
-      <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-200">
+    <div className="apple-glass rounded-3xl p-6 shadow-2xl relative overflow-hidden" data-fleet-container>
+      <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] mb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
             Autonomous Specialist Fleet Status
           </h3>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="text-gray-500">Mission Phase:</span>
-          <span className={`px-2.5 py-0.5 rounded font-bold uppercase tracking-wider text-[10px] font-mono border ${
-            stage === 'COMPLETE' ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700' :
-            stage === 'REPLANNING' ? 'bg-amber-950/80 text-amber-300 border-amber-700 animate-pulse' :
-            stage === 'VALIDATION' ? 'bg-purple-950/80 text-purple-300 border-purple-700' :
-            stage === 'EXECUTION' ? 'bg-blue-950/80 text-blue-300 border-blue-700' :
-            'bg-white/[0.03] text-gray-500 border-white/5'
+          <span className="text-slate-500">Mission Phase:</span>
+          <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] font-mono border ${
+            stage === 'COMPLETE' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' :
+            stage === 'REPLANNING' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 animate-pulse' :
+            stage === 'VALIDATION' ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' :
+            stage === 'EXECUTION' ? 'bg-blue-500/15 text-blue-300 border-blue-500/30' :
+            'bg-white/[0.03] text-slate-500 border-white/5'
           }`}>
             {stage}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 relative">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 relative">
         {/* Challenge connector arrow overlay */}
         <ChallengeConnector stage={stage} hasChallenge={hasChallenge} />
 
@@ -101,40 +96,38 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
           // Commander pulse when receiving challenge
           const isCommanderReceivingChallenge = agent.id === 'Commander' && (stage === 'REPLANNING' || stage === 'VALIDATION') && hasChallenge;
 
-          // Elapsed and tool
           const toolCall = lastEvent?.tool;
           const elapsed = lastEvent?.elapsed_seconds ? `+${lastEvent.elapsed_seconds.toFixed(1)}s` : '—';
 
-          // Agent accent color for border + glow
           const agentColor = getAgentColor(agent.id);
 
           return (
             <motion.div
               key={agent.id}
               data-agent-id={agent.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.07, duration: 0.35 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
               animate={isCommanderReceivingChallenge ? {
                 boxShadow: [
-                  '0 0 0px rgba(59, 130, 246, 0)',
-                  '0 0 30px rgba(59, 130, 246, 0.6)',
-                  '0 0 0px rgba(59, 130, 246, 0)',
+                  '0 0 0px rgba(41, 151, 255, 0)',
+                  '0 0 30px rgba(41, 151, 255, 0.6)',
+                  '0 0 0px rgba(41, 151, 255, 0)',
                 ],
               } : undefined}
-              // @ts-ignore - framer-motion transition for animate keyframes
+              // @ts-ignore
               {...(isCommanderReceivingChallenge ? {
-                transition: { boxShadow: { duration: 1.2, repeat: 2, ease: 'easeInOut' }, delay: index * 0.07, duration: 0.35 }
+                transition: { boxShadow: { duration: 1.2, repeat: 2, ease: 'easeInOut' }, delay: index * 0.05, duration: 0.3 }
               } : {})}
-              className={`p-3.5 rounded-xl border-l-[3px] border transition-all duration-300 relative flex flex-col justify-between ${
+              className={`p-4 rounded-2xl border-l-[3px] border transition-all duration-300 relative flex flex-col justify-between ${
                 isActive
-                  ? 'bg-blue-950/40 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/60 scale-[1.02]'
+                  ? 'bg-blue-500/15 border-cyan-400 shadow-[0_0_20px_rgba(41,151,255,0.25)] ring-1 ring-cyan-400/60 scale-[1.02]'
                   : isValidationChallenge && !isComplete
-                  ? 'bg-amber-950/30 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                  ? 'bg-amber-500/10 border-amber-500/60 shadow-[0_0_20px_rgba(255,159,10,0.15)]'
                   : hasActed
-                  ? 'bg-[#10121b] border-white/10'
-                  : 'bg-[#0e0f16] border-white/5 opacity-60'
+                  ? 'apple-glass-card'
+                  : 'bg-white/[0.02] border-white/[0.06] opacity-60'
               }`}
               style={{
                 borderLeftColor: agentColor.hex,
@@ -143,54 +136,54 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
             >
               <div>
                 {/* Card Top: Icon + Status */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className={`p-1.5 rounded-lg ${
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2 rounded-xl ${
                     isActive ? 'bg-cyan-500/20 text-cyan-400' :
                     isValidationChallenge && !isComplete ? 'bg-amber-500/20 text-amber-400' :
-                    hasActed ? 'bg-white/[0.04] text-gray-300' :
-                    'bg-white/[0.02] text-gray-600'
+                    hasActed ? 'bg-white/[0.04] text-slate-300' :
+                    'bg-white/[0.02] text-slate-600'
                   }`}>
                     <agent.icon size={16} className={isActive ? 'animate-spin-slow' : ''} />
                   </div>
 
                   {/* Status badge */}
                   {isActive ? (
-                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-700 animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" /> PROCESSING
+                    <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded-full border border-cyan-700 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" /> Active
                     </span>
                   ) : isValidationChallenge && !isComplete ? (
-                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-700">
-                      <AlertTriangle size={10} /> CHALLENGE
+                    <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-300 bg-amber-950 px-2 py-0.5 rounded-full border border-amber-700">
+                      <AlertTriangle size={10} /> Challenge
                     </span>
                   ) : isComplete ? (
-                    <span className="flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">
-                      <CheckCircle2 size={10} /> COMPLETE
+                    <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-800">
+                      <CheckCircle2 size={10} /> Verified
                     </span>
                   ) : hasActed ? (
-                    <span className="text-[9px] font-mono text-gray-400 bg-white/[0.04] px-1.5 py-0.5 rounded">
-                      STANDBY
+                    <span className="text-[10px] font-mono text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded-full">
+                      Standby
                     </span>
                   ) : (
-                    <span className="text-[9px] font-mono text-gray-600">
-                      IDLE
+                    <span className="text-[10px] font-mono text-slate-600">
+                      Idle
                     </span>
                   )}
                 </div>
 
                 {/* Name & Role */}
-                <div className="font-bold text-xs text-gray-100 font-mono tracking-tight">{agent.name}</div>
-                <div className="text-[9px] text-cyan-400/90 font-mono font-semibold uppercase">{agent.shortRole}</div>
-                <div className="text-[9px] text-gray-500 font-mono mt-1">{agent.engine}</div>
+                <div className="font-bold text-sm text-white tracking-tight">{agent.name}</div>
+                <div className="text-[10px] text-cyan-400 font-mono font-semibold uppercase mt-0.5">{agent.shortRole}</div>
+                <div className="text-[10px] text-slate-400 font-sans mt-1">{agent.engine}</div>
               </div>
 
               {/* Card Bottom: Tool execution & Elapsed */}
-              <div className="mt-3 pt-2 border-t border-white/5 font-mono text-[9px]">
-                <div className="flex items-center justify-between text-gray-400">
-                  <span>Action / Tool:</span>
-                  <span className="text-gray-500">{elapsed}</span>
+              <div className="mt-4 pt-2.5 border-t border-white/[0.06] font-mono text-[10px]">
+                <div className="flex items-center justify-between text-slate-400">
+                  <span>Tool Execution:</span>
+                  <span className="text-slate-400">{elapsed}</span>
                 </div>
-                <div className="truncate text-gray-300 font-semibold mt-0.5" title={toolCall || (isActive ? 'Reasoning...' : 'Awaiting dispatch')}>
-                  {toolCall ? `tool: ${toolCall}` : isActive ? 'Gemini 2.5 Multi-turn' : '—'}
+                <div className="truncate text-slate-200 font-semibold mt-0.5" title={toolCall || (isActive ? 'Reasoning...' : 'Awaiting dispatch')}>
+                  {toolCall ? `tool: ${toolCall}` : isActive ? 'Gemini 2.5 Reasoning' : '—'}
                 </div>
               </div>
             </motion.div>

@@ -34,153 +34,150 @@ export function IncidentPanel({
   }, []);
 
   return (
-    <div className="bg-[#0b0c12] border-2 border-red-500/50 rounded-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.2)] relative overflow-hidden font-mono">
-      {/* Background ambient red glow for active emergency */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/15 blur-[140px] pointer-events-none" />
-
+    <div className="apple-glass rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
       {/* Top Banner: Incident Title + Sector Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-white/10 mb-5 relative z-10">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/[0.08] mb-6 relative z-10">
+        <div className="flex items-center gap-3.5">
           <div className="relative">
-            <span className="w-3.5 h-3.5 rounded-full bg-red-500 block animate-ping" />
-            <span className="w-3.5 h-3.5 rounded-full bg-red-500 block absolute inset-0" />
+            <span className="w-3 h-3 rounded-full bg-red-500 block animate-ping" />
+            <span className="w-3 h-3 rounded-full bg-red-500 block absolute inset-0" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-mono font-black uppercase tracking-widest bg-red-500 text-black px-2.5 py-0.5 rounded-full shadow-sm">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest bg-red-500/15 text-red-400 border border-red-500/30 px-2.5 py-0.5 rounded-full">
                 CRITICAL INFRASTRUCTURE DEFICIT
               </span>
-              <span className="text-xs text-red-400 font-bold flex items-center gap-1">
-                <Radio size={12} className="animate-pulse text-red-400" /> LIVE IOT TELEMETRY FEED
+              <span className="text-xs text-red-400 font-mono font-medium flex items-center gap-1">
+                <Radio size={12} className="animate-pulse text-red-400" /> Live IoT Stream
               </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight mt-1">
-              BRIDGE PIER P-04 • SAN MATEO BRIDGE • SPAN 14A
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1">
+              Bridge Pier P-04 • San Mateo Bridge Span 14A
             </h2>
           </div>
         </div>
 
         {/* Sector Switcher */}
-        <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
-          <span className="text-[10px] text-gray-400 uppercase font-bold">TARGET SECTOR:</span>
+        <div className="flex items-center gap-2.5 shrink-0 self-start md:self-auto">
+          <span className="text-[11px] text-slate-400 uppercase font-mono font-medium">Target Sector:</span>
           <div className="relative">
             <select
               value={selectedScenario}
               onChange={(e) => onSelectScenario(e.target.value)}
               disabled={isMissionRunning}
-              className="appearance-none bg-[#141624] border border-white/20 hover:border-red-500/60 text-gray-200 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:ring-1 focus:ring-red-500 focus:outline-none disabled:opacity-50 cursor-pointer transition-colors"
+              className="appearance-none bg-black/60 border border-white/20 hover:border-red-500/50 text-slate-200 text-xs rounded-xl pl-3.5 pr-8 py-2 focus:ring-1 focus:ring-red-500 focus:outline-none disabled:opacity-50 cursor-pointer transition-all font-mono"
             >
               {scenarios.map((sc) => (
-                <option key={sc.id} value={sc.id} className="bg-[#0b0c12]">
+                <option key={sc.id} value={sc.id} className="bg-[#0c0c10] text-white">
                   {sc.name}
                 </option>
               ))}
             </select>
-            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
         </div>
       </div>
 
-      {/* Hero Telemetry + Major CTA Section */}
+      {/* Hero Telemetry Grid + Dominant CTA Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 relative z-10 items-stretch">
         
-        {/* Left 8 cols: 4 Large Telemetry Values */}
+        {/* Left 8 cols: 4 Telemetry Metrics */}
         <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           
           {/* Card 1: Microstrain */}
-          <div className="bg-black/60 p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-amber-500/50 transition-colors">
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center justify-between">
+          <div className="apple-glass-card p-4 rounded-2xl flex flex-col justify-between hover:border-amber-500/40 transition-colors">
+            <div className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider flex items-center justify-between">
               <span>MICROSTRAIN</span>
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             </div>
             <div className="my-2">
-              <div className="text-2xl md:text-3xl font-black text-amber-400 tracking-tight">
-                {strainJitter.toLocaleString()} <span className="text-xs font-normal text-gray-400">με</span>
+              <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight">
+                {strainJitter.toLocaleString()} <span className="text-xs font-normal text-slate-400">με</span>
               </div>
-              <div className="text-[10px] text-amber-300 font-bold mt-0.5">
-                ● HIGH ANOMALY
+              <div className="text-[10px] text-amber-300 font-mono font-bold mt-0.5">
+                ● High Anomaly
               </div>
             </div>
-            <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
-              Piezoelectric sensor #S-14
+            <div className="text-[10px] text-slate-500 font-mono pt-1.5 border-t border-white/[0.06]">
+              Piezoelectric #S-14
             </div>
           </div>
 
           {/* Card 2: Acoustic Emission */}
-          <div className="bg-black/60 p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-red-500/50 transition-colors">
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center justify-between">
+          <div className="apple-glass-card p-4 rounded-2xl flex flex-col justify-between hover:border-red-500/40 transition-colors">
+            <div className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider flex items-center justify-between">
               <span>ACOUSTIC EMISSION</span>
-              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
             </div>
             <div className="my-2">
-              <div className="text-2xl md:text-3xl font-black text-red-400 tracking-tight">
-                {aeJitter} <span className="text-xs font-normal text-gray-400">dB</span>
+              <div className="text-2xl sm:text-3xl font-black text-red-400 font-mono tracking-tight">
+                {aeJitter} <span className="text-xs font-normal text-slate-400">dB</span>
               </div>
-              <div className="text-[10px] text-red-300 font-bold mt-0.5">
-                ● ACTIVE CRACKING
+              <div className="text-[10px] text-red-300 font-mono font-bold mt-0.5">
+                ● Active Cracking
               </div>
             </div>
-            <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
-              Ultrasonic wave sensor #A-02
+            <div className="text-[10px] text-slate-500 font-mono pt-1.5 border-t border-white/[0.06]">
+              Ultrasonic #A-02
             </div>
           </div>
 
           {/* Card 3: Peak Ground Acceleration */}
-          <div className="bg-black/60 p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-cyan-500/50 transition-colors">
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center justify-between">
+          <div className="apple-glass-card p-4 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-colors">
+            <div className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider flex items-center justify-between">
               <span>GROUND ACCEL (PGA)</span>
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
             </div>
             <div className="my-2">
-              <div className="text-2xl md:text-3xl font-black text-cyan-400 tracking-tight">
-                0.42 <span className="text-xs font-normal text-gray-400">g</span>
+              <div className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono tracking-tight">
+                0.42 <span className="text-xs font-normal text-slate-400">g</span>
               </div>
-              <div className="text-[10px] text-cyan-300 font-bold mt-0.5">
-                ● SEISMIC OVERLOAD
+              <div className="text-[10px] text-cyan-300 font-mono font-bold mt-0.5">
+                ● Seismic Overload
               </div>
             </div>
-            <div className="text-[9px] text-gray-500 pt-1.5 border-t border-white/5">
-              Tri-axial accelerometer
+            <div className="text-[10px] text-slate-500 font-mono pt-1.5 border-t border-white/[0.06]">
+              Tri-axial Accel
             </div>
           </div>
 
-          {/* Card 4: CURRENT SAFETY FACTOR (HERO CRITICAL) */}
-          <div className="bg-red-950/60 p-4 rounded-xl border-2 border-red-500/90 shadow-[0_0_25px_rgba(239,68,68,0.3)] flex flex-col justify-between">
-            <div className="flex items-center justify-between text-[10px] text-red-300 uppercase font-black tracking-wider">
+          {/* Card 4: CURRENT SAFETY FACTOR */}
+          <div className="bg-red-950/40 border border-red-500/60 p-4 rounded-2xl shadow-[0_4px_25px_rgba(239,68,68,0.2)] flex flex-col justify-between">
+            <div className="flex items-center justify-between text-[10px] text-red-300 font-mono uppercase font-bold tracking-wider">
               <span>SAFETY FACTOR</span>
-              <span className="bg-red-500 text-black px-1.5 py-0.2 rounded font-bold text-[9px]">
+              <span className="bg-red-500 text-black px-1.5 py-0.2 rounded font-black text-[9px]">
                 CRITICAL
               </span>
             </div>
             <div className="my-2">
-              <div className="text-3xl md:text-4xl font-black text-red-400 tracking-tight">
+              <div className="text-3xl sm:text-4xl font-black text-red-400 font-mono tracking-tight">
                 0.94
               </div>
-              <div className="text-[10px] text-red-200 font-bold mt-0.5 flex items-center justify-between">
+              <div className="text-[10px] text-red-200 font-mono font-bold mt-0.5 flex items-center justify-between">
                 <span>REQ: ≥ 1.50</span>
                 <span className="text-red-400 font-black">DEFICIT: −0.56</span>
               </div>
             </div>
-            <div className="text-[9px] text-red-300 font-bold pt-1.5 border-t border-red-500/30">
+            <div className="text-[10px] text-red-300 font-sans font-medium pt-1.5 border-t border-red-500/30">
               Imminent flexural failure
             </div>
           </div>
         </div>
 
-        {/* Right 4 cols: Unmistakable Dominant CTA */}
-        <div className="lg:col-span-4 bg-gradient-to-b from-blue-950/70 via-[#101322] to-[#0b0c12] p-5 rounded-xl border-2 border-cyan-500/70 shadow-[0_0_35px_rgba(6,182,212,0.35)] flex flex-col justify-between">
+        {/* Right 4 cols: Dominant Apple CTA */}
+        <div className="lg:col-span-4 apple-glass p-5 rounded-2xl border border-cyan-500/40 shadow-[0_0_35px_rgba(41,151,255,0.2)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] uppercase font-black text-cyan-400 tracking-wider flex items-center gap-1.5">
+              <span className="text-[10px] uppercase font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-1.5">
                 <ShieldAlert size={13} className="text-cyan-400" />
-                AUTONOMOUS COMMAND CONTROL
+                Autonomous Command Control
               </span>
-              <span className="flex items-center gap-1 text-[9px] text-emerald-400 font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> SWARM READY
+              <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Swarm Ready
               </span>
             </div>
-            <p className="text-xs text-gray-300 font-sans leading-relaxed">
-              Triggers autonomous multi-agent triage: Gemini reasoning, deterministic mechanics, independent validation challenge, and adaptive replanning.
+            <p className="text-xs text-slate-300 font-sans leading-relaxed">
+              Triggers multi-agent triage: Gemini reasoning, deterministic mechanics, independent validation challenge, and adaptive replanning.
             </p>
           </div>
 
@@ -188,34 +185,34 @@ export function IncidentPanel({
             <button
               onClick={onTriggerMission}
               disabled={isMissionRunning}
-              className="w-full group relative flex items-center justify-center gap-2 px-5 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl shadow-[0_0_35px_rgba(6,182,212,0.5)] text-sm font-black tracking-widest transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full group relative flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 disabled:opacity-50 text-white rounded-xl shadow-[0_0_30px_rgba(41,151,255,0.4)] text-xs font-mono font-black tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               {isMissionRunning ? (
                 <>
-                  <Activity size={18} className="animate-spin text-cyan-200" />
+                  <Activity size={16} className="animate-spin text-cyan-200" />
                   <span>MISSION IN PROGRESS...</span>
                 </>
               ) : isComplete ? (
                 <>
-                  <Zap size={18} className="text-emerald-300" />
+                  <Zap size={16} className="text-emerald-300" />
                   <span>⚡ RE-TRIGGER TRIAGE SWARM</span>
                 </>
               ) : (
                 <>
-                  <Zap size={18} className="text-yellow-300 group-hover:animate-pulse" />
+                  <Zap size={16} className="text-yellow-300 group-hover:animate-pulse" />
                   <span>⚡ INITIATE AUTONOMOUS TRIAGE</span>
                 </>
               )}
             </button>
 
-            <div className="text-[9px] text-center text-gray-400 mt-2 flex items-center justify-center gap-2 flex-wrap">
-              <span className="text-white font-bold">5 SPECIALIST AGENTS</span>
+            <div className="text-[10px] font-mono text-center text-slate-400 mt-2 flex items-center justify-center gap-2 flex-wrap">
+              <span>5 Agents</span>
               <span>•</span>
-              <span className="text-cyan-300 font-bold">GEMINI REASONING</span>
+              <span className="text-cyan-300">Gemini 2.5 Pro</span>
               <span>•</span>
-              <span className="text-emerald-300 font-bold">DETERMINISTIC PHYSICS</span>
+              <span className="text-emerald-300">OpenSeesPy</span>
               <span>•</span>
-              <span className="text-purple-300 font-bold">INDEPENDENT VALIDATION</span>
+              <span className="text-purple-300">Validation Gate</span>
             </div>
           </div>
         </div>
