@@ -1,6 +1,7 @@
 import { Terminal, Brain, Target, ShieldCheck, ChevronDown, ChevronRight, Wrench, RefreshCw, Activity } from 'lucide-react';
 import type { MissionEvent } from '../types/mission';
 import { useEffect, useRef, useState } from 'react';
+import { getAgentColor } from '../utils/agentColors';
 
 interface AgentTimelineProps {
   events: MissionEvent[];
@@ -115,10 +116,13 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
               ? `+${event.elapsed_seconds.toFixed(1)}s`
               : (event.timestamp ? event.timestamp.split('T')[1]?.substring(0, 8) : `+${(idx * 1.2).toFixed(1)}s`);
 
+            // Agent accent color for left border + glow
+            const agentColor = getAgentColor(event.agent);
+
             return (
               <div
                 key={event.event_id || idx}
-                className={`p-2.5 rounded-xl border transition-all duration-200 ${
+                className={`p-2.5 rounded-xl border-l-[3px] border transition-all duration-200 ${
                   isWarning
                     ? 'bg-red-950/30 border-red-500/80 text-red-200 shadow-[0_0_15px_rgba(239,68,68,0.15)]'
                     : isReplan
@@ -127,6 +131,10 @@ export function AgentTimeline({ events }: AgentTimelineProps) {
                     ? 'bg-emerald-950/30 border-emerald-500/80 text-emerald-200'
                     : 'bg-black/30 border-white/5 hover:border-white/15 text-gray-200'
                 }`}
+                style={{
+                  borderLeftColor: agentColor.hex,
+                  boxShadow: agentColor.glowShadow,
+                }}
               >
                 {/* Event Top Line */}
                 <div className="flex items-center justify-between gap-2 mb-1 flex-wrap text-[10px]">

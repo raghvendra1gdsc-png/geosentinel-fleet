@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { MissionEvent } from '../types/mission';
+import { getAgentColor } from '../utils/agentColors';
 
 interface DecisionRationaleProps {
   events?: MissionEvent[];
@@ -14,6 +16,7 @@ export function DecisionRationale(_props: DecisionRationaleProps) {
     {
       title: 'H1 Formulation & Initial Dispatch',
       agent: 'Commander Agent (Gemini 2.5 Pro)',
+      agentId: 'Commander',
       observation: 'Piezoelectric microstrain = 2,140 με, Acoustic emission = 84.5 dB.',
       evidence: 'Seismic ground acceleration PGA = 0.42g recorded on Span 14A.',
       hypothesis: 'H1: Surface spalling indicates primary shear failure mode at pier base.',
@@ -24,6 +27,7 @@ export function DecisionRationale(_props: DecisionRationaleProps) {
     {
       title: 'Adversarial Challenge & Rejection of H1',
       agent: 'Validation Agent (Independent Gate)',
+      agentId: 'ValidationAgent',
       observation: 'ACI 318 Shear Capacity check calculated φVn = 850 kN vs Demand Vu = 550 kN (SF = 1.54 PASS).',
       evidence: 'Physical sensor readings (2,140 με, 84.5 dB) clearly indicate structural distress that shear adequacy fails to explain.',
       hypothesis: 'Shear-only model is INCONCLUSIVE and physically contradictory.',
@@ -34,6 +38,7 @@ export function DecisionRationale(_props: DecisionRationaleProps) {
     {
       title: 'Adaptive Replanning to Non-Linear Fiber FEA',
       agent: 'Commander Agent (Gemini 2.5 Pro)',
+      agentId: 'Commander',
       observation: 'Validation Sentinel objection received; shear hypothesis refuted.',
       evidence: 'High microstrain aligns with axial-flexural plastic hinge formation.',
       hypothesis: 'H2: True failure mode is flexural yield and ductility degradation.',
@@ -44,6 +49,7 @@ export function DecisionRationale(_props: DecisionRationaleProps) {
     {
       title: 'CFRP Composite Retrofit Optimization & Closure',
       agent: 'Retrofit Agent & Validation Audit',
+      agentId: 'RetrofitAgent',
       observation: 'Moment-Curvature analysis uncovered true Flexural Safety Factor SF = 0.94 (< 1.50 CRITICAL).',
       evidence: 'Moment demand Mu = 800 kNm exceeds yield section capacity (750 kNm).',
       hypothesis: 'CFRP composite jacket confinement will restore section ductility and flexural capacity.',
@@ -75,15 +81,24 @@ export function DecisionRationale(_props: DecisionRationaleProps) {
       <div className="space-y-2.5">
         {decisions.map((dec, idx) => {
           const isExpanded = expandedIndex === idx;
+          const agentColor = getAgentColor(dec.agentId);
 
           return (
-            <div
+            <motion.div
               key={idx}
-              className={`rounded-xl border transition-all ${
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.07, duration: 0.3 }}
+              className={`rounded-xl border-l-[3px] border transition-all ${
                 isExpanded
                   ? 'bg-black/60 border-cyan-500/40 shadow-md'
                   : 'bg-black/30 border-white/5 hover:border-white/15'
               }`}
+              style={{
+                borderLeftColor: agentColor.hex,
+                boxShadow: isExpanded ? agentColor.glowShadow : undefined,
+              }}
             >
               {/* Header Button */}
               <button
@@ -136,7 +151,7 @@ export function DecisionRationale(_props: DecisionRationaleProps) {
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>

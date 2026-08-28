@@ -1,4 +1,5 @@
 import { Brain, Cpu, ShieldCheck, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface EvidenceChainProps {
   stage: string;
@@ -37,11 +38,17 @@ export function EvidenceChain({ stage, hasReplanned }: EvidenceChainProps) {
       {/* The 3-Tier Layered Evidence Chain */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 relative">
         {/* Tier 1: AI Reasoning */}
-        <div className={`p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between ${
-          stage !== 'IDLE'
-            ? 'bg-blue-950/40 border-blue-500/60 shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30'
-            : 'bg-[#0f111a] border-white/10'
-        }`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0, duration: 0.35 }}
+          className={`p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between ${
+            stage !== 'IDLE'
+              ? 'bg-blue-950/40 border-blue-500/60 shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/30'
+              : 'bg-[#0f111a] border-white/10'
+          }`}
+        >
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-mono font-black uppercase tracking-widest text-blue-400">
@@ -64,14 +71,20 @@ export function EvidenceChain({ stage, hasReplanned }: EvidenceChainProps) {
             <span>Mandate:</span>
             <span className="font-bold">Strategic Coordination</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Tier 2: Deterministic Engineering Physics */}
-        <div className={`p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between ${
-          stage === 'EXECUTION' || isComplete
-            ? 'bg-emerald-950/40 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'
-            : 'bg-[#0f111a] border-white/10'
-        }`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 1 * 0.07, duration: 0.35 }}
+          className={`p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between ${
+            stage === 'EXECUTION' || isComplete
+              ? 'bg-emerald-950/40 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'
+              : 'bg-[#0f111a] border-white/10'
+          }`}
+        >
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-mono font-black uppercase tracking-widest text-emerald-400">
@@ -94,16 +107,22 @@ export function EvidenceChain({ stage, hasReplanned }: EvidenceChainProps) {
             <span>Mandate:</span>
             <span className="font-bold">Physics Verification</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Tier 3: Independent Validation Gate */}
-        <div className={`p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between ${
-          hasReplanned
-            ? 'bg-amber-950/40 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.2)] ring-1 ring-amber-500/40'
-            : isComplete
-            ? 'bg-emerald-950/40 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'
-            : 'bg-[#0f111a] border-white/10'
-        }`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 2 * 0.07, duration: 0.35 }}
+          className={`p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between ${
+            hasReplanned
+              ? 'bg-amber-950/40 border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.2)] ring-1 ring-amber-500/40'
+              : isComplete
+              ? 'bg-emerald-950/40 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'
+              : 'bg-[#0f111a] border-white/10'
+          }`}
+        >
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-mono font-black uppercase tracking-widest text-purple-400">
@@ -126,7 +145,7 @@ export function EvidenceChain({ stage, hasReplanned }: EvidenceChainProps) {
             <span>Enforcement:</span>
             <span className="font-bold">SF ≥ 1.50 Compliance</span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

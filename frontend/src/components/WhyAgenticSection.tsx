@@ -1,4 +1,5 @@
 import { Eye, Brain, Users, ShieldAlert, RotateCw, Wrench, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export function WhyAgenticSection() {
   const steps = [
@@ -92,11 +93,15 @@ export function WhyAgenticSection() {
 
       {/* The 7 Steps Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3 font-mono">
-        {steps.map((step) => {
+        {steps.map((step, index) => {
           const Icon = step.icon;
           return (
-            <div
+            <motion.div
               key={step.num}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.07, duration: 0.35 }}
               className={`p-3.5 rounded-xl border ${step.border} ${step.bg} flex flex-col justify-between transition-all hover:scale-[1.02]`}
             >
               <div>
@@ -107,7 +112,7 @@ export function WhyAgenticSection() {
                 <div className="text-xs font-bold text-white mb-1.5 tracking-tight">{step.title}</div>
                 <p className="text-[11px] text-gray-300 font-sans leading-snug">{step.desc}</p>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

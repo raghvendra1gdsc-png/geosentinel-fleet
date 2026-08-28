@@ -1,5 +1,7 @@
 import { ArrowRight, AlertOctagon, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { MissionState } from '../types/mission';
+import { AnimatedNumber } from './AnimatedNumber';
 
 interface HeroMetricsProps {
   missionState: MissionState | null;
@@ -20,7 +22,13 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-3 font-mono">
       {/* Metric 1: Initial Shear Mode */}
-      <div className="bg-[#0b0c12] border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0 }}
+        className="bg-[#0b0c12] border border-white/10 rounded-xl p-3.5 flex flex-col justify-between"
+      >
         <div className="flex items-center justify-between text-[10px] text-gray-400">
           <span className="uppercase tracking-wider">Phase 1: Shear Screen</span>
           <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
@@ -29,7 +37,7 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         </div>
         <div className="my-2">
           <div className="text-2xl font-black text-white tracking-tight">
-            {shearData ? '1.54' : '—'}
+            {shearData ? <AnimatedNumber value={1.54} decimals={2} /> : '—'}
             <span className="text-xs font-normal text-gray-500 ml-1">SF</span>
           </div>
           <div className="text-[10px] text-gray-400">
@@ -39,10 +47,16 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         <div className="text-[9px] text-emerald-400 font-semibold flex items-center gap-1">
           {shearData ? '✓ Shear Not Primary Mode' : '• Sensor Telemetry Ready'}
         </div>
-      </div>
+      </motion.div>
 
       {/* Metric 2: True Validated Failure Mode */}
-      <div className="bg-[#0b0c12] border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 1 * 0.07 }}
+        className="bg-[#0b0c12] border border-white/10 rounded-xl p-3.5 flex flex-col justify-between"
+      >
         <div className="flex items-center justify-between text-[10px] text-gray-400">
           <span className="uppercase tracking-wider">Phase 2: True Section Mode</span>
           <span className="text-[9px] px-1.5 py-0.2 rounded bg-red-950 text-red-400 border border-red-800">
@@ -51,7 +65,7 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         </div>
         <div className="my-2">
           <div className="text-2xl font-black text-red-400 tracking-tight">
-            {preSF ? preSF.toFixed(2) : (mcData ? '0.94' : '—')}
+            {preSF ? <AnimatedNumber value={preSF} decimals={2} /> : (mcData ? <AnimatedNumber value={0.94} decimals={2} /> : '—')}
             <span className="text-xs font-normal text-gray-500 ml-1">SF</span>
           </div>
           <div className="text-[10px] text-gray-400">
@@ -61,10 +75,16 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         <div className="text-[9px] text-red-400 font-semibold flex items-center gap-1">
           {preSF || mcData ? '⚠ Flexural Plastic Hinge Yield' : '• Nonlinear Fiber Model'}
         </div>
-      </div>
+      </motion.div>
 
       {/* Metric 3: Post-Retrofit Verified Safety */}
-      <div className="bg-[#0b0c12] border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 2 * 0.07 }}
+        className="bg-[#0b0c12] border border-white/10 rounded-xl p-3.5 flex flex-col justify-between"
+      >
         <div className="flex items-center justify-between text-[10px] text-gray-400">
           <span className="uppercase tracking-wider">Phase 3: Post-CFRP State</span>
           <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-950 text-purple-400 border border-purple-800">
@@ -73,7 +93,7 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         </div>
         <div className="my-2">
           <div className="text-2xl font-black text-emerald-400 tracking-tight">
-            {postSF ? postSF.toFixed(2) : (retroData ? retroData.post_retrofit_safety_factor?.toFixed(2) : '—')}
+            {postSF ? <AnimatedNumber value={postSF} decimals={2} /> : (retroData ? <AnimatedNumber value={retroData.post_retrofit_safety_factor} decimals={2} /> : '—')}
             <span className="text-xs font-normal text-gray-500 ml-1">SF</span>
           </div>
           <div className="text-[10px] text-gray-400">
@@ -83,14 +103,20 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         <div className="text-[9px] text-emerald-400 font-semibold flex items-center gap-1">
           {postSF || retroData ? '✓ Safety Threshold Exceeded (≥1.50)' : '• Multi-ply optimization'}
         </div>
-      </div>
+      </motion.div>
 
       {/* Metric 4: Risk State Transition Hero */}
-      <div className={`rounded-xl p-3.5 flex flex-col justify-between border transition-all duration-500 ${
-        isComplete
-          ? 'bg-emerald-950/40 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-          : 'bg-[#0b0c12] border-white/10'
-      }`}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 3 * 0.07 }}
+        className={`rounded-xl p-3.5 flex flex-col justify-between border transition-all duration-500 ${
+          isComplete
+            ? 'bg-emerald-950/40 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+            : 'bg-[#0b0c12] border-white/10'
+        }`}
+      >
         <div className="flex items-center justify-between text-[10px] text-gray-400">
           <span className="uppercase tracking-wider">Risk State Transition</span>
           <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
@@ -101,9 +127,13 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
         </div>
         <div className="my-2">
           <div className="flex items-center gap-2 text-lg font-bold text-white tracking-tight">
-            <span className="text-red-400">0.94</span>
+            <span className="text-red-400">
+              <AnimatedNumber value={0.94} decimals={2} />
+            </span>
             <ArrowRight size={16} className="text-gray-500" />
-            <span className="text-emerald-400">{postSF ? postSF.toFixed(2) : (isComplete ? '1.74' : '—')}</span>
+            <span className="text-emerald-400">
+              {postSF ? <AnimatedNumber value={postSF} decimals={2} /> : (isComplete ? <AnimatedNumber value={1.74} decimals={2} /> : '—')}
+            </span>
           </div>
           <div className="text-[10px] text-gray-400">
             {isComplete ? 'Structural Safety Factor Restored' : 'Critical Deficit Detected'}
@@ -120,7 +150,7 @@ export function HeroMetrics({ missionState, stage }: HeroMetricsProps) {
             </span>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

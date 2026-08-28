@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, ReferenceLine, Legend
@@ -18,8 +18,50 @@ export function EngineeringDashboard({ missionState }: EngineeringDashboardProps
   const shearData = missionState?.shear_capacity_data || BASELINE_SHEAR_DATA;
   const retroData = missionState?.retrofit_data || BASELINE_RETROFIT_DATA;
 
-  // 1. Moment-Curvature Curve Points
-  const curvePoints = mcData?.curve_data?.points || BASELINE_MC_DATA.curve_data.points;
+  // 1. Moment-Curvature Curve Points — with progressive draw-in
+  const allCurvePoints = mcData?.curve_data?.points || BASELINE_MC_DATA.curve_data.points;
+  const [visiblePointCount, setVisiblePointCount] = useState(allCurvePoints.length);
+  const drawInTimerRef = useRef<any>(null);
+  const prevMcDataRef = useRef<any>(null);
+
+  // Detect when moment_curvature_data first arrives and trigger draw-in
+  useEffect(() => {
+    const mcDataArrived = missionState?.moment_curvature_data;
+    const wasPreviouslyNull = prevMcDataRef.current === null || prevMcDataRef.current === undefined;
+    prevMcDataRef.current = mcDataArrived;
+
+    if (mcDataArrived && wasPreviouslyNull) {
+      // Start draw-in animation: reveal points one by one over ~2 seconds
+      setVisiblePointCount(1);
+      let count = 1;
+      const totalPoints = allCurvePoints.length;
+      const intervalMs = 2000 / totalPoints; // ~143ms per point for 14 points
+
+      if (drawInTimerRef.current) clearInterval(drawInTimerRef.current);
+
+      drawInTimerRef.current = setInterval(() => {
+        count++;
+        setVisiblePointCount(count);
+        if (count >= totalPoints) {
+          clearInterval(drawInTimerRef.current);
+          drawInTimerRef.current = null;
+        }
+      }, intervalMs);
+    } else if (!mcDataArrived) {
+      // Reset when mission resets
+      setVisiblePointCount(allCurvePoints.length);
+      if (drawInTimerRef.current) {
+        clearInterval(drawInTimerRef.current);
+        drawInTimerRef.current = null;
+      }
+    }
+
+    return () => {
+      if (drawInTimerRef.current) clearInterval(drawInTimerRef.current);
+    };
+  }, [missionState?.moment_curvature_data, allCurvePoints.length]);
+
+  const curvePoints = allCurvePoints.slice(0, visiblePointCount);
 
   // 2. Shear Demand vs Capacity Data
   const shearBarData = [
@@ -36,7 +78,7 @@ export function EngineeringDashboard({ missionState }: EngineeringDashboardProps
   const plyData = retroData?.ply_optimization_curve || BASELINE_RETROFIT_DATA.ply_optimization_curve;
 
   return (
-    <div className="bg-[#0b0c12] border border-white/15 rounded-2xl p-5 shadow-2xl flex flex-col h-[560px] relative overflow-hidden font-mono">
+    <div id="section-engineering" className="bg-[#0b0c12] border border-white/15 rounded-2xl p-5 shadow-2xl flex flex-col h-[560px] relative overflow-hidden font-mono">
       {/* Header with Switcher Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
@@ -117,6 +159,8 @@ export function EngineeringDashboard({ missionState }: EngineeringDashboardProps
                     strokeWidth={2.5}
                     dot={{ r: 3, fill: '#06b6d4' }}
                     activeDot={{ r: 6, fill: '#22d3ee', stroke: '#000', strokeWidth: 2 }}
+                    isAnimationActive={true}
+                    animationDuration={300}
                   />
                 </LineChart>
               </ResponsiveContainer>

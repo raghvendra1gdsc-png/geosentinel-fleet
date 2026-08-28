@@ -14,6 +14,8 @@ interface MissionStepControlsProps {
   onOpenArchitecture: () => void;
   onOpenDossier: () => void;
   missionStatus: string;
+  isAutoplay?: boolean;
+  onToggleAutoplay?: () => void;
 }
 
 export function MissionStepControls({
@@ -28,7 +30,9 @@ export function MissionStepControls({
   onReplayMission,
   onOpenArchitecture,
   onOpenDossier,
-  missionStatus
+  missionStatus,
+  isAutoplay = false,
+  onToggleAutoplay
 }: MissionStepControlsProps) {
   const isComplete = missionStatus === 'COMPLETE';
 
@@ -63,6 +67,22 @@ export function MissionStepControls({
           <Zap size={14} className="text-yellow-300 fill-yellow-300" />
           <span>⚡ INITIATE AUTONOMOUS TRIAGE</span>
         </button>
+
+        {/* Judge Mode Autoplay Toggle */}
+        {onToggleAutoplay && (
+          <button
+            onClick={onToggleAutoplay}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border font-bold transition-all ${
+              isAutoplay
+                ? 'bg-purple-950/80 border-purple-400 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.4)] ring-1 ring-purple-400/50'
+                : 'bg-white/5 hover:bg-white/10 text-gray-300 border-white/10'
+            }`}
+            title="Hands-free continuous mission execution with auto-scroll for judges"
+          >
+            <span className={`w-2 h-2 rounded-full ${isAutoplay ? 'bg-purple-400 animate-ping' : 'bg-gray-500'}`} />
+            <span>AUTOPLAY DEMO</span>
+          </button>
+        )}
 
         {/* Pause / Resume button */}
         {isMissionRunning && (

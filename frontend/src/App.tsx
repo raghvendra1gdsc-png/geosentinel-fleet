@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Clock, Cpu, Zap, Activity } from 'lucide-react';
+import { ShieldAlert, Clock, Cpu, Zap, Activity, Radio, Cpu as CpuIcon, FileCheck, CheckCircle2 } from 'lucide-react';
 import type { MissionEvent, MissionState, ScenarioSummary } from './types/mission';
 import { WebSocketClient } from './services/websocket';
 import { api } from './services/api';
@@ -24,6 +24,11 @@ import { MissionStepControls } from './components/MissionStepControls';
 import { ArchitectureModal } from './components/ArchitectureModal';
 import { VerificationDossierModal } from './components/VerificationDossierModal';
 import { MissionReplay } from './components/MissionReplay';
+import { AnimatedNumber } from './components/AnimatedNumber';
+import { HeroStat } from './components/HeroStat';
+import { useAutoplay } from './hooks/useAutoplay';
+
+type WorkspaceDeck = 'SWARM' | 'PHYSICS' | 'AUDIT';
 
 function App() {
   const [scenarios, setScenarios] = useState<ScenarioSummary[]>([]);
@@ -41,6 +46,7 @@ function App() {
   const [hasGeminiKey, setHasGeminiKey] = useState<boolean>(true);
   const [isArchModalOpen, setIsArchModalOpen] = useState<boolean>(false);
   const [isDossierModalOpen, setIsDossierModalOpen] = useState<boolean>(false);
+  const [activeDeck, setActiveDeck] = useState<WorkspaceDeck>('SWARM');
   const simulationTimerRef = useRef<any>(null);
 
   // Keep isPausedRef in sync
@@ -153,7 +159,6 @@ function App() {
 
   // Instant High-Fidelity Client-Side Swarm Execution with Server Sync
   const triggerMission = async () => {
-    // Clear any previous timer
     if (simulationTimerRef.current) {
       clearInterval(simulationTimerRef.current);
     }
@@ -296,6 +301,12 @@ function App() {
     setIsPaused(prev => !prev);
   };
 
+  // Judge-mode Autoplay
+  const { isAutoplay, toggleAutoplay } = useAutoplay({
+    triggerMission,
+    missionStatus,
+  });
+
   const downloadDossier = async () => {
     const id = missionId || 'GSF-2026-P04-DEMO';
     try {
@@ -327,17 +338,18 @@ function App() {
   const hasReplanned = visibleEvents.some(e => e.event_type === 'REPLANNING' || e.stage === 'REPLANNING' || e.message.toLowerCase().includes('replan'));
 
   return (
-    <div className="min-h-screen bg-[#05060a] bg-grid-pattern text-gray-200 selection:bg-cyan-500/30 selection:text-white font-sans antialiased">
+    <div className="min-h-screen bg-[#07080d] bg-grid-pattern text-slate-100 selection:bg-cyan-500/30 selection:text-white font-sans antialiased">
 
       {/* ═══════════════ TACTICAL COMMAND HEADER (NASA / JPL MISSION CONTROL) ═══════════════ */}
-      <header className="border-b border-white/10 bg-[#07080f]/95 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            {/* Brand & System Title */}
+      <header className="border-b border-white/[0.08] bg-[#07080d]/95 backdrop-blur-xl sticky top-0 z-50 shadow-2xl">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            
+            {/* Brand & System Identity */}
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-600 text-white rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.4)] ring-1 ring-white/20">
-                  <ShieldAlert size={22} />
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 text-white rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.4)] ring-1 ring-white/20">
+                  <ShieldAlert size={22} className="text-white" />
                 </div>
                 {isMissionRunning && (
                   <span className="absolute -top-1 -right-1 w-3 h-3">
@@ -349,40 +361,54 @@ function App() {
 
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-base font-black text-white font-mono tracking-tight">
-                    GEOSENTINEL FLEET
+                  <h1 className="text-base font-black text-white font-mono tracking-tight flex items-center gap-2">
+                    <span>GEOSENTINEL FLEET</span>
                   </h1>
-                  <span className="text-[9px] font-mono font-bold bg-white/[0.04] text-gray-300 border border-white/10 px-2 py-0.5 rounded">
-                    AUTONOMOUS INFRASTRUCTURE RESPONSE
+                  <span className="text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded tracking-wide">
+                    AUTONOMOUS INFRASTRUCTURE SWARM
                   </span>
                 </div>
-                <div className="text-[10px] text-gray-400 font-mono">
-                  Google All Things Agentic • 2026 Hackathon
+                <div className="text-[11px] text-slate-400 font-sans flex items-center gap-2">
+                  <span>Google All Things Agentic Hackathon 2026</span>
+                  <span className="text-slate-600">•</span>
+                  <span className="text-cyan-400 font-mono text-[10px]">Gemini 2.5 Pro Multi-Agent Core</span>
                 </div>
               </div>
             </div>
 
-            {/* Status Strip: System Online | Gemini Link Active | Physics Engine Ready | Validation Gate Armed */}
+            {/* Tactical Mission Controls & Actions */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <MissionStepControls
+                scenarios={scenarios}
+                selectedScenario={selectedScenario}
+                onSelectScenario={(id) => setSelectedScenario(id)}
+                onTriggerMission={triggerMission}
+                onResetMission={resetMission}
+                isMissionRunning={isMissionRunning}
+                isPaused={isPaused}
+                onTogglePause={togglePause}
+                onReplayMission={() => setIsReplaying(true)}
+                onOpenArchitecture={() => setIsArchModalOpen(true)}
+                onOpenDossier={() => setIsDossierModalOpen(true)}
+                missionStatus={missionStatus}
+                isAutoplay={isAutoplay}
+                onToggleAutoplay={toggleAutoplay}
+              />
+            </div>
+
+            {/* Live Telemetry Status Strip */}
             <div className="flex items-center gap-2 font-mono text-[10px] flex-wrap">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 border border-white/[0.08]">
                 <span className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
                 <span className={wsConnected ? 'text-emerald-300 font-bold' : 'text-amber-300'}>
-                  {wsConnected ? 'SYSTEM ONLINE' : 'STANDBY'}
+                  {wsConnected ? 'SWARM ONLINE' : 'STANDBY'}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 border border-white/[0.08]">
                 <span className={`w-2 h-2 rounded-full ${hasGeminiKey ? 'bg-cyan-400 animate-pulse' : 'bg-amber-400'}`} />
                 <span className={hasGeminiKey ? 'text-cyan-300 font-bold' : 'text-amber-300'}>
-                  {hasGeminiKey ? 'GEMINI LINK ACTIVE' : 'REASONING ARMED'}
+                  {hasGeminiKey ? 'GEMINI LINKED' : 'REASONING ARMED'}
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 hidden sm:flex">
-                <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <span className="text-blue-300 font-bold">PHYSICS ENGINE READY</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 hidden sm:flex">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                <span className="text-purple-300 font-bold">VALIDATION GATE ARMED</span>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-950/70 border border-red-800 text-red-300 font-bold">
                 <span>TARGET: PIER P-04</span>
@@ -391,157 +417,236 @@ function App() {
             </div>
           </div>
 
-          {/* Operational Metrics Bar (Live During Execution) */}
+          {/* Operational Metrics Live Ticker Bar */}
           {(visibleEvents.length > 0 || isMissionRunning) && (
-            <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-4 text-[10px] font-mono text-gray-400 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <Clock size={11} className="text-cyan-400" />
-                <span>Elapsed: <strong className="text-white">{visibleEvents[visibleEvents.length - 1]?.elapsed_seconds?.toFixed(1) || '0.0'}s</strong></span>
+            <div className="mt-2 pt-2 border-t border-white/[0.06] flex items-center justify-between gap-4 text-[11px] font-mono text-slate-400 flex-wrap">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <Clock size={12} className="text-cyan-400" />
+                  <span>Elapsed: <strong className="text-white"><AnimatedNumber value={visibleEvents[visibleEvents.length - 1]?.elapsed_seconds ?? 0} decimals={1} suffix="s" /></strong></span>
+                </div>
+                <span className="text-slate-700">|</span>
+                <div className="flex items-center gap-1.5">
+                  <Cpu size={12} className="text-blue-400" />
+                  <span>Active Fleet: <strong className="text-cyan-300"><AnimatedNumber value={uniqueAgentsCount || 5} />/5 Specialists</strong></span>
+                </div>
+                <span className="text-slate-700">|</span>
+                <div className="flex items-center gap-1.5">
+                  <Zap size={12} className="text-amber-400" />
+                  <span>Deterministic Tool Runs: <strong className="text-white"><AnimatedNumber value={toolCallsCount} /></strong></span>
+                </div>
+                <span className="text-slate-700">|</span>
+                <div className="flex items-center gap-1.5">
+                  <Activity size={12} className={isMissionRunning ? "text-amber-400 animate-pulse" : "text-emerald-400"} />
+                  <span>Phase: <strong className={isMissionRunning ? "text-amber-300 uppercase" : "text-emerald-400 uppercase"}>{missionStatus}</strong></span>
+                </div>
               </div>
-              <span className="text-gray-700">|</span>
-              <div className="flex items-center gap-1.5">
-                <Cpu size={11} className="text-blue-400" />
-                <span>Active Swarm: <strong className="text-cyan-300">{uniqueAgentsCount || 5}/5 Agents</strong></span>
-              </div>
-              <span className="text-gray-700">|</span>
-              <div className="flex items-center gap-1.5">
-                <Zap size={11} className="text-amber-400" />
-                <span>Tool Executions: <strong className="text-white">{toolCallsCount}</strong></span>
-              </div>
-              <span className="text-gray-700">|</span>
-              <div className="flex items-center gap-1.5">
-                <Activity size={11} className={isMissionRunning ? "text-amber-400 animate-pulse" : "text-emerald-400"} />
-                <span>Phase: <strong className={isMissionRunning ? "text-amber-300 uppercase" : "text-emerald-400 uppercase"}>{missionStatus}</strong></span>
+
+              {/* Status prompt */}
+              <div className="text-[10px] text-slate-400 hidden md:flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span>ASCE 41-17 • ACI 318-19 • ACI 440.2R-17 Verified</span>
               </div>
             </div>
           )}
         </div>
       </header>
 
-      {/* ═══════════════ MAIN MISSION CONTROL VIEWPORT ═══════════════ */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
+      {/* ═══════════════ MAIN OPERATIONS CONTROL VIEWPORT ═══════════════ */}
+      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-5 space-y-5">
 
-        {/* 1. Mission Step Controls (Scenario selector, Run, Pause, Replay, Reset, Modals) */}
-        <MissionStepControls
-          scenarios={scenarios}
-          selectedScenario={selectedScenario}
-          onSelectScenario={(id) => setSelectedScenario(id)}
-          onTriggerMission={triggerMission}
-          onResetMission={resetMission}
-          isMissionRunning={isMissionRunning}
-          isPaused={isPaused}
-          onTogglePause={togglePause}
-          onReplayMission={() => setIsReplaying(true)}
-          onOpenArchitecture={() => setIsArchModalOpen(true)}
-          onOpenDossier={() => setIsDossierModalOpen(true)}
-          missionStatus={missionStatus}
-        />
+        {/* 1. TOP HERO HUD BANNER (Pipeline + Metrics + Comparison) */}
+        <div className="space-y-4">
+          {/* Mission Pipeline Progression */}
+          <div id="section-mission-pipeline">
+            <MissionPipeline
+              stage={missionStatus}
+              activeAgent={activeAgent}
+              eventsCount={visibleEvents.length}
+            />
+          </div>
 
-        {/* 2. Above-the-Fold Hero Emergency Incident & Dispatch Control Panel */}
-        <IncidentPanel
-          scenarios={scenarios}
-          selectedScenario={selectedScenario}
-          onSelectScenario={(id) => setSelectedScenario(id)}
-          isMissionRunning={isMissionRunning}
-          onTriggerMission={triggerMission}
-          missionStatus={missionStatus}
-        />
-
-        {/* 3. Live Autonomous Mission Pipeline (The 7-Stage Horizontal Timeline) */}
-        <MissionPipeline
-          stage={missionStatus}
-          activeAgent={activeAgent}
-          eventsCount={visibleEvents.length}
-        />
-
-        {/* 4. Hero Engineering Metrics Transition (0.94 -> 1.74) */}
-        <HeroMetrics
-          missionState={missionState}
-          stage={missionStatus}
-        />
-
-        {/* 5. Autonomy Scorecard (Real Dynamic KPI Counters) */}
-        <AutonomyScorecard
-          events={visibleEvents}
-          stage={missionStatus}
-        />
-
-        {/* 6. Validation Override & Replan Moment Alert (When Triggered) */}
-        <ReplanAlert
-          events={visibleEvents}
-          stage={missionStatus}
-        />
-
-        {/* 7. 3-Layer Evidence Chain (Reasoning -> Physics -> Validation) */}
-        <EvidenceChain
-          stage={missionStatus}
-          hasReplanned={hasReplanned}
-        />
-
-        {/* 8. Structural Section State Transition (Before & After RC Pier Section Diagram) */}
-        <StructuralSectionView
-          missionState={missionState}
-          stage={missionStatus}
-        />
-
-        {/* 9. Sensor -> Deterministic Physics Correlation Matrix */}
-        <SensorPhysicsCorrelation
-          missionState={missionState}
-          stage={missionStatus}
-        />
-
-        {/* 10. Autonomous Decision Rationale ("Why Did The Agent Do That?") */}
-        <DecisionRationale
-          events={visibleEvents}
-          stage={missionStatus}
-        />
-
-        {/* 11. Live Swarm Topology & Control Graph (Centerpiece) */}
-        <MissionGraph
-          activeAgent={activeAgent}
-          events={visibleEvents}
-          stage={missionStatus}
-          missionState={missionState}
-        />
-
-        {/* 12. Mission Replay Controls (When Activated) */}
-        {isReplaying && events.length > 0 && (
-          <MissionReplay
-            events={events}
-            onReplayUpdate={(vis) => setVisibleEvents(vis)}
-            onExitReplay={() => {
-              setIsReplaying(false);
-              setVisibleEvents(events);
-            }}
+          {/* Hero Metrics Transition Grid (0.94 -> 1.74) */}
+          <HeroMetrics
+            missionState={missionState}
+            stage={missionStatus}
           />
-        )}
 
-        {/* 13. Autonomous Specialist Fleet Status Cards */}
-        <AgentFleet
-          activeAgent={activeAgent}
-          events={visibleEvents}
-          stage={missionStatus}
-        />
+          {/* Hero Triage vs Manual Comparison Stat */}
+          <HeroStat events={visibleEvents} stage={missionStatus} />
 
-        {/* 14. Main Dual Grid: Operational Swarm Terminal + Deterministic Physics Workstation */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
-          {/* Left Column: Live Terminal Stream with Severity Tags */}
-          <AgentTimeline events={visibleEvents} />
-
-          {/* Right Column: Deterministic Physics Workstation */}
-          <EngineeringDashboard missionState={missionState} />
+          {/* Mission Replay Controls (When Active) */}
+          {isReplaying && events.length > 0 && (
+            <MissionReplay
+              events={events}
+              onReplayUpdate={(vis) => setVisibleEvents(vis)}
+              onExitReplay={() => {
+                setIsReplaying(false);
+                setVisibleEvents(events);
+              }}
+            />
+          )}
         </div>
 
-        {/* 15. Concluded Executive Remediation Directive & Audit Dossier Package */}
-        <ExecutivePanel
-          missionState={missionState}
-          onDownloadDossier={downloadDossier}
-          onReplayMission={() => setIsReplaying(!isReplaying)}
-          isReplaying={isReplaying}
-        />
+        {/* 2. THE 3-DECK WORKSPACE SWITCHER (Focus-Driven Architecture) */}
+        <div className="bg-[#0b0c14] border border-white/[0.08] p-1.5 rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-xl">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveDeck('SWARM')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all ${
+                activeDeck === 'SWARM'
+                  ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] ring-1 ring-white/20'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <Radio size={14} className={activeDeck === 'SWARM' ? 'animate-pulse' : ''} />
+              <span>🎯 DECK 1: LIVE SWARM OPERATIONS</span>
+            </button>
 
-        {/* 16. Why GeoSentinel Is Truly Agentic (7-Point Breakdown for Judges) */}
-        <WhyAgenticSection />
+            <button
+              onClick={() => setActiveDeck('PHYSICS')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all ${
+                activeDeck === 'PHYSICS'
+                  ? 'bg-cyan-600 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] ring-1 ring-white/20'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <CpuIcon size={14} />
+              <span>🔬 DECK 2: PHYSICS & SIMULATION LAB</span>
+            </button>
+
+            <button
+              onClick={() => setActiveDeck('AUDIT')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all ${
+                activeDeck === 'AUDIT'
+                  ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] ring-1 ring-white/20'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <FileCheck size={14} />
+              <span>📋 DECK 3: AUDIT & GOVERNANCE DOSSIER</span>
+            </button>
+          </div>
+
+          <div className="text-[11px] font-mono text-slate-400 px-3 hidden sm:flex items-center gap-2">
+            <span className="text-cyan-400 font-bold">VIEW:</span>
+            <span>{activeDeck === 'SWARM' ? 'Autonomous Swarm Orchestration' : activeDeck === 'PHYSICS' ? 'Deterministic Engineering Calculations' : 'Cryptographic Compliance & Evaluation'}</span>
+          </div>
+        </div>
+
+        {/* ═══════════════ DECK 1: LIVE SWARM OPERATIONS ═══════════════ */}
+        {activeDeck === 'SWARM' && (
+          <div className="space-y-5 animate-in fade-in duration-300">
+            {/* Validation Replan Alert (Hero Adversarial Challenge) */}
+            <div id="section-replan-alert">
+              <ReplanAlert
+                events={visibleEvents}
+                stage={missionStatus}
+              />
+            </div>
+
+            {/* Main Dual Grid: Interactive Graph & Terminal vs Incident & Specialist Fleet */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+              
+              {/* Left Column (7 cols): Swarm Control Graph + Live Terminal Console */}
+              <div className="xl:col-span-7 space-y-5">
+                {/* Live Swarm Topology & Control Graph */}
+                <MissionGraph
+                  activeAgent={activeAgent}
+                  events={visibleEvents}
+                  stage={missionStatus}
+                  missionState={missionState}
+                />
+
+                {/* Live Swarm Terminal Stream */}
+                <AgentTimeline events={visibleEvents} />
+              </div>
+
+              {/* Right Column (5 cols): Incident Target + Specialist Fleet + Evidence Chain */}
+              <div className="xl:col-span-5 space-y-5">
+                {/* Incident Emergency Dispatch Context */}
+                <div id="section-incident-panel">
+                  <IncidentPanel
+                    scenarios={scenarios}
+                    selectedScenario={selectedScenario}
+                    onSelectScenario={(id) => setSelectedScenario(id)}
+                    isMissionRunning={isMissionRunning}
+                    onTriggerMission={triggerMission}
+                    missionStatus={missionStatus}
+                  />
+                </div>
+
+                {/* Specialist Fleet Status Cards */}
+                <AgentFleet
+                  activeAgent={activeAgent}
+                  events={visibleEvents}
+                  stage={missionStatus}
+                />
+
+                {/* 3-Tier Layered Evidence Chain */}
+                <EvidenceChain
+                  stage={missionStatus}
+                  hasReplanned={hasReplanned}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ DECK 2: PHYSICS & SIMULATION LAB ═══════════════ */}
+        {activeDeck === 'PHYSICS' && (
+          <div className="space-y-5 animate-in fade-in duration-300">
+            {/* Deterministic Physics Workstation */}
+            <div id="section-engineering">
+              <EngineeringDashboard missionState={missionState} />
+            </div>
+
+            {/* Structural Section State Transition (600x600mm RC Pier Diagram) */}
+            <div id="section-structural-view">
+              <StructuralSectionView
+                missionState={missionState}
+                stage={missionStatus}
+              />
+            </div>
+
+            {/* Sensor to Physics Correlation Matrix */}
+            <SensorPhysicsCorrelation
+              missionState={missionState}
+              stage={missionStatus}
+            />
+          </div>
+        )}
+
+        {/* ═══════════════ DECK 3: AUDIT & GOVERNANCE DOSSIER ═══════════════ */}
+        {activeDeck === 'AUDIT' && (
+          <div className="space-y-5 animate-in fade-in duration-300">
+            {/* Autonomy & Compliance Scorecard */}
+            <AutonomyScorecard
+              events={visibleEvents}
+              stage={missionStatus}
+            />
+
+            {/* Executive Remediation Directive & Audit Dossier Package */}
+            <div id="section-executive">
+              <ExecutivePanel
+                missionState={missionState}
+                onDownloadDossier={downloadDossier}
+                onReplayMission={() => setIsReplaying(!isReplaying)}
+                isReplaying={isReplaying}
+              />
+            </div>
+
+            {/* Autonomous Decision Rationale ("Why Did The Agent Act?") */}
+            <DecisionRationale
+              events={visibleEvents}
+              stage={missionStatus}
+            />
+
+            {/* Why GeoSentinel Is Truly Agentic (7-Point Breakdown) */}
+            <WhyAgenticSection />
+          </div>
+        )}
+
       </main>
 
       {/* ═══════════════ ARCHITECTURE MODAL ═══════════════ */}
@@ -559,17 +664,21 @@ function App() {
       />
 
       {/* ═══════════════ OPERATIONAL FOOTER ═══════════════ */}
-      <footer className="border-t border-white/10 bg-[#07080f]/90 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] font-mono text-gray-500">
-          <div>
-            <span className="text-gray-300 font-bold">GEOSENTINEL FLEET</span> • Autonomous Infrastructure Swarm • Google All Things Agentic Hackathon
+      <footer className="border-t border-white/[0.08] bg-[#07080d]/95 backdrop-blur-xl mt-12 py-5">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-slate-500">
+          <div className="flex items-center gap-2">
+            <span className="text-white font-bold tracking-tight">GEOSENTINEL FLEET</span>
+            <span>•</span>
+            <span>Autonomous Infrastructure Swarm</span>
+            <span>•</span>
+            <span className="text-cyan-400">Google All Things Agentic Hackathon</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span>Gemini 2.5 Pro</span>
+          <div className="flex items-center gap-3 text-slate-400 flex-wrap">
+            <span className="flex items-center gap-1"><CheckCircle2 size={12} className="text-emerald-400" /> Gemini 2.5 Pro</span>
             <span>•</span>
             <span>NumPy</span>
             <span>•</span>
-            <span>OpenSeesPy</span>
+            <span>OpenSeesPy FEA</span>
             <span>•</span>
             <span>ACI 318 / ASCE 41 / ACI 440.2R</span>
           </div>

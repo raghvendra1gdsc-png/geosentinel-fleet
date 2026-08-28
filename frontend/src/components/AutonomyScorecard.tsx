@@ -1,4 +1,6 @@
+import { motion } from 'framer-motion';
 import type { MissionEvent } from '../types/mission';
+import { AnimatedNumber } from './AnimatedNumber';
 
 interface AutonomyScorecardProps {
   events: MissionEvent[];
@@ -42,68 +44,126 @@ export function AutonomyScorecard({ events, stage }: AutonomyScorecardProps) {
       {/* 8 Metric KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 text-center">
         {/* Metric 1 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Human Touch</span>
-          <div className="text-xl font-black text-emerald-400 my-1">0</div>
+          <div className="text-xl font-black text-emerald-400 my-1">
+            <AnimatedNumber value={0} />
+          </div>
           <span className="text-[8px] text-gray-500">100% Autonomous</span>
-        </div>
+        </motion.div>
 
         {/* Metric 2 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 1 * 0.07 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Commander Acts</span>
-          <div className="text-xl font-black text-blue-400 my-1">{commanderDecisions || (stage !== 'IDLE' ? 1 : 0)}</div>
+          <div className="text-xl font-black text-blue-400 my-1">
+            <AnimatedNumber value={commanderDecisions || (stage !== 'IDLE' ? 1 : 0)} />
+          </div>
           <span className="text-[8px] text-gray-500">Gemini 2.5 Pro</span>
-        </div>
+        </motion.div>
 
         {/* Metric 3 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 2 * 0.07 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Specialists</span>
-          <div className="text-xl font-black text-cyan-400 my-1">{uniqueSpecialists || 4}</div>
+          <div className="text-xl font-black text-cyan-400 my-1">
+            <AnimatedNumber value={uniqueSpecialists || 4} />
+          </div>
           <span className="text-[8px] text-gray-500">Fleet Deployed</span>
-        </div>
+        </motion.div>
 
         {/* Metric 4 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 3 * 0.07 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Physics Runs</span>
-          <div className="text-xl font-black text-emerald-400 my-1">{toolExecutions || (isComplete ? 3 : 0)}</div>
+          <div className="text-xl font-black text-emerald-400 my-1">
+            <AnimatedNumber value={toolExecutions || (isComplete ? 3 : 0)} />
+          </div>
           <span className="text-[8px] text-gray-500">ACI / OpenSeesPy</span>
-        </div>
+        </motion.div>
 
         {/* Metric 5 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 4 * 0.07 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Challenges</span>
           <div className={`text-xl font-black my-1 ${challengesRaised > 0 ? 'text-amber-400' : 'text-gray-400'}`}>
-            {challengesRaised > 0 ? challengesRaised : (isComplete ? 1 : 0)}
+            <AnimatedNumber value={challengesRaised > 0 ? challengesRaised : (isComplete ? 1 : 0)} />
           </div>
           <span className="text-[8px] text-gray-500">Objection Raised</span>
-        </div>
+        </motion.div>
 
         {/* Metric 6 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 5 * 0.07 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Replans</span>
           <div className={`text-xl font-black my-1 ${replansTriggered > 0 ? 'text-orange-400' : 'text-gray-400'}`}>
-            {replansTriggered > 0 ? replansTriggered : (isComplete ? 1 : 0)}
+            <AnimatedNumber value={replansTriggered > 0 ? replansTriggered : (isComplete ? 1 : 0)} />
           </div>
           <span className="text-[8px] text-gray-500">Strategy Pivot</span>
-        </div>
+        </motion.div>
 
         {/* Metric 7 */}
-        <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 6 * 0.07 }}
+          className="bg-black/40 p-2.5 rounded-xl border border-white/5 flex flex-col justify-between"
+        >
           <span className="text-[9px] text-gray-400 uppercase font-bold">Audit Gates</span>
-          <div className="text-xl font-black text-purple-400 my-1">{validationGates || (isComplete ? 2 : 0)}</div>
+          <div className="text-xl font-black text-purple-400 my-1">
+            <AnimatedNumber value={validationGates || (isComplete ? 2 : 0)} />
+          </div>
           <span className="text-[8px] text-gray-500">SF ≥ 1.50 Enforced</span>
-        </div>
+        </motion.div>
 
         {/* Metric 8 */}
-        <div className={`p-2.5 rounded-xl border flex flex-col justify-between ${
-          isComplete ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300' : 'bg-black/40 border-white/5 text-gray-400'
-        }`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 7 * 0.07 }}
+          className={`p-2.5 rounded-xl border flex flex-col justify-between ${
+            isComplete ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300' : 'bg-black/40 border-white/5 text-gray-400'
+          }`}
+        >
           <span className="text-[9px] uppercase font-bold">Outcome</span>
           <div className="text-xs font-black my-1 truncate">
             {isComplete ? '✓ VERIFIED' : 'PENDING'}
           </div>
           <span className="text-[8px]">{isComplete ? 'SF 1.74 Restored' : 'In Progress'}</span>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

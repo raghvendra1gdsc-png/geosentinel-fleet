@@ -1,5 +1,8 @@
 import { Activity, ShieldCheck, Cpu, Wrench, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { MissionEvent } from '../types/mission';
+import { getAgentColor } from '../utils/agentColors';
+import { ChallengeConnector } from './ChallengeConnector';
 
 interface AgentFleetProps {
   activeAgent: string | null;
@@ -51,8 +54,12 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
     },
   ];
 
+  const hasChallenge = events.some(
+    e => e.event_type === 'VALIDATION_FLAG' || e.status === 'WARNING' || e.message.toLowerCase().includes('reject') || e.message.toLowerCase().includes('insufficient')
+  );
+
   return (
-    <div className="bg-[#0b0c12] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+    <div className="bg-[#0b0c12] border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden" data-fleet-container>
       <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
@@ -75,8 +82,11 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-        {agents.map((agent) => {
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 relative">
+        {/* Challenge connector arrow overlay */}
+        <ChallengeConnector stage={stage} hasChallenge={hasChallenge} />
+
+        {agents.map((agent, index) => {
           const isActive = activeAgent === agent.id;
           const agentEvents = events.filter(e => e.agent === agent.id);
           const hasActed = agentEvents.length > 0;
@@ -88,14 +98,36 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
 
           const isComplete = stage === 'COMPLETE' && hasActed;
 
+          // Commander pulse when receiving challenge
+          const isCommanderReceivingChallenge = agent.id === 'Commander' && (stage === 'REPLANNING' || stage === 'VALIDATION') && hasChallenge;
+
           // Elapsed and tool
           const toolCall = lastEvent?.tool;
           const elapsed = lastEvent?.elapsed_seconds ? `+${lastEvent.elapsed_seconds.toFixed(1)}s` : '—';
 
+          // Agent accent color for border + glow
+          const agentColor = getAgentColor(agent.id);
+
           return (
-            <div
+            <motion.div
               key={agent.id}
-              className={`p-3.5 rounded-xl border transition-all duration-300 relative flex flex-col justify-between ${
+              data-agent-id={agent.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.07, duration: 0.35 }}
+              animate={isCommanderReceivingChallenge ? {
+                boxShadow: [
+                  '0 0 0px rgba(59, 130, 246, 0)',
+                  '0 0 30px rgba(59, 130, 246, 0.6)',
+                  '0 0 0px rgba(59, 130, 246, 0)',
+                ],
+              } : undefined}
+              // @ts-ignore - framer-motion transition for animate keyframes
+              {...(isCommanderReceivingChallenge ? {
+                transition: { boxShadow: { duration: 1.2, repeat: 2, ease: 'easeInOut' }, delay: index * 0.07, duration: 0.35 }
+              } : {})}
+              className={`p-3.5 rounded-xl border-l-[3px] border transition-all duration-300 relative flex flex-col justify-between ${
                 isActive
                   ? 'bg-blue-950/40 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/60 scale-[1.02]'
                   : isValidationChallenge && !isComplete
@@ -104,6 +136,10 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
                   ? 'bg-[#10121b] border-white/10'
                   : 'bg-[#0e0f16] border-white/5 opacity-60'
               }`}
+              style={{
+                borderLeftColor: agentColor.hex,
+                boxShadow: isCommanderReceivingChallenge ? undefined : agentColor.glowShadow,
+              }}
             >
               <div>
                 {/* Card Top: Icon + Status */}
@@ -157,7 +193,7 @@ export function AgentFleet({ activeAgent, events, stage }: AgentFleetProps) {
                   {toolCall ? `tool: ${toolCall}` : isActive ? 'Gemini 2.5 Multi-turn' : '—'}
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

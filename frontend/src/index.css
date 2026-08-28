@@ -197,3 +197,38 @@ body {
   background-size: 200% 100%;
   animation: shimmer 3s ease infinite;
 }
+
+/* ═══════════════════════════════════════════════════ */
+/* Challenge Connector Animation */
+/* ═══════════════════════════════════════════════════ */
+@keyframes draw-arrow-line {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  80% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-arrow-head {
+  0%, 70% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.challenge-connector-line {
+  animation: draw-arrow-line 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.challenge-connector-arrow {
+  animation: fade-arrow-head 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+

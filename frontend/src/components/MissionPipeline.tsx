@@ -1,4 +1,5 @@
 import { Search, Brain, Activity, ShieldAlert, RotateCw, Wrench, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MissionPipelineProps {
   stage: string;
@@ -126,8 +127,12 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
           const isPassed = step.isDone;
 
           return (
-            <div
+            <motion.div
               key={step.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.07, duration: 0.35 }}
               className={`p-3 rounded-xl border transition-all duration-300 flex flex-col justify-between relative ${
                 isCurrent
                   ? 'bg-blue-950/80 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400/80 scale-[1.02]'
@@ -172,7 +177,7 @@ export function MissionPipeline({ stage, activeAgent, eventsCount }: MissionPipe
               <div className="mt-2.5 pt-1.5 border-t border-white/5 text-[9px] text-gray-400 truncate">
                 {step.agentTag}
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
