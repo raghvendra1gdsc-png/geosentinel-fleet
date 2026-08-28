@@ -342,8 +342,8 @@ function App() {
 
       {/* ═══════════════ TACTICAL COMMAND HEADER (NASA / JPL MISSION CONTROL) ═══════════════ */}
       <header className="border-b border-white/[0.08] bg-[#07080d]/95 backdrop-blur-xl sticky top-0 z-50 shadow-2xl">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             
             {/* Brand & System Identity */}
             <div className="flex items-center gap-3">
@@ -361,8 +361,8 @@ function App() {
 
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-base font-black text-white font-mono tracking-tight flex items-center gap-2">
-                    <span>GEOSENTINEL FLEET</span>
+                  <h1 className="text-base font-black text-white font-mono tracking-tight">
+                    GEOSENTINEL FLEET
                   </h1>
                   <span className="text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded tracking-wide">
                     AUTONOMOUS INFRASTRUCTURE SWARM
@@ -374,26 +374,6 @@ function App() {
                   <span className="text-cyan-400 font-mono text-[10px]">Gemini 2.5 Pro Multi-Agent Core</span>
                 </div>
               </div>
-            </div>
-
-            {/* Tactical Mission Controls & Actions */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <MissionStepControls
-                scenarios={scenarios}
-                selectedScenario={selectedScenario}
-                onSelectScenario={(id) => setSelectedScenario(id)}
-                onTriggerMission={triggerMission}
-                onResetMission={resetMission}
-                isMissionRunning={isMissionRunning}
-                isPaused={isPaused}
-                onTogglePause={togglePause}
-                onReplayMission={() => setIsReplaying(true)}
-                onOpenArchitecture={() => setIsArchModalOpen(true)}
-                onOpenDossier={() => setIsDossierModalOpen(true)}
-                missionStatus={missionStatus}
-                isAutoplay={isAutoplay}
-                onToggleAutoplay={toggleAutoplay}
-              />
             </div>
 
             {/* Live Telemetry Status Strip */}
@@ -419,7 +399,7 @@ function App() {
 
           {/* Operational Metrics Live Ticker Bar */}
           {(visibleEvents.length > 0 || isMissionRunning) && (
-            <div className="mt-2 pt-2 border-t border-white/[0.06] flex items-center justify-between gap-4 text-[11px] font-mono text-slate-400 flex-wrap">
+            <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between gap-4 text-[11px] font-mono text-slate-400 flex-wrap">
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-1.5">
                   <Clock size={12} className="text-cyan-400" />
@@ -453,9 +433,27 @@ function App() {
       </header>
 
       {/* ═══════════════ MAIN OPERATIONS CONTROL VIEWPORT ═══════════════ */}
-      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-5 space-y-5">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
 
-        {/* 1. TOP HERO HUD BANNER (Pipeline + Metrics + Comparison) */}
+        {/* 1. Tactical Mission Controls Bar (Full width, centered) */}
+        <MissionStepControls
+          scenarios={scenarios}
+          selectedScenario={selectedScenario}
+          onSelectScenario={(id) => setSelectedScenario(id)}
+          onTriggerMission={triggerMission}
+          onResetMission={resetMission}
+          isMissionRunning={isMissionRunning}
+          isPaused={isPaused}
+          onTogglePause={togglePause}
+          onReplayMission={() => setIsReplaying(true)}
+          onOpenArchitecture={() => setIsArchModalOpen(true)}
+          onOpenDossier={() => setIsDossierModalOpen(true)}
+          missionStatus={missionStatus}
+          isAutoplay={isAutoplay}
+          onToggleAutoplay={toggleAutoplay}
+        />
+
+        {/* 2. TOP HERO HUD BANNER (Pipeline + Metrics + Comparison) */}
         <div className="space-y-4">
           {/* Mission Pipeline Progression */}
           <div id="section-mission-pipeline">
@@ -488,9 +486,9 @@ function App() {
           )}
         </div>
 
-        {/* 2. THE 3-DECK WORKSPACE SWITCHER (Focus-Driven Architecture) */}
+        {/* 3. THE 3-DECK WORKSPACE SWITCHER */}
         <div className="bg-[#0b0c14] border border-white/[0.08] p-1.5 rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-xl">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setActiveDeck('SWARM')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all ${
@@ -534,7 +532,7 @@ function App() {
           </div>
         </div>
 
-        {/* ═══════════════ DECK 1: LIVE SWARM OPERATIONS ═══════════════ */}
+        {/* ═══════════════ DECK 1: LIVE SWARM OPERATIONS (FULL WIDTH & CLEAN) ═══════════════ */}
         {activeDeck === 'SWARM' && (
           <div className="space-y-5 animate-in fade-in duration-300">
             {/* Validation Replan Alert (Hero Adversarial Challenge) */}
@@ -545,51 +543,41 @@ function App() {
               />
             </div>
 
-            {/* Main Dual Grid: Interactive Graph & Terminal vs Incident & Specialist Fleet */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-              
-              {/* Left Column (7 cols): Swarm Control Graph + Live Terminal Console */}
-              <div className="xl:col-span-7 space-y-5">
-                {/* Live Swarm Topology & Control Graph */}
-                <MissionGraph
-                  activeAgent={activeAgent}
-                  events={visibleEvents}
-                  stage={missionStatus}
-                  missionState={missionState}
-                />
-
-                {/* Live Swarm Terminal Stream */}
-                <AgentTimeline events={visibleEvents} />
-              </div>
-
-              {/* Right Column (5 cols): Incident Target + Specialist Fleet + Evidence Chain */}
-              <div className="xl:col-span-5 space-y-5">
-                {/* Incident Emergency Dispatch Context */}
-                <div id="section-incident-panel">
-                  <IncidentPanel
-                    scenarios={scenarios}
-                    selectedScenario={selectedScenario}
-                    onSelectScenario={(id) => setSelectedScenario(id)}
-                    isMissionRunning={isMissionRunning}
-                    onTriggerMission={triggerMission}
-                    missionStatus={missionStatus}
-                  />
-                </div>
-
-                {/* Specialist Fleet Status Cards */}
-                <AgentFleet
-                  activeAgent={activeAgent}
-                  events={visibleEvents}
-                  stage={missionStatus}
-                />
-
-                {/* 3-Tier Layered Evidence Chain */}
-                <EvidenceChain
-                  stage={missionStatus}
-                  hasReplanned={hasReplanned}
-                />
-              </div>
+            {/* Incident Emergency Dispatch Panel */}
+            <div id="section-incident-panel">
+              <IncidentPanel
+                scenarios={scenarios}
+                selectedScenario={selectedScenario}
+                onSelectScenario={(id) => setSelectedScenario(id)}
+                isMissionRunning={isMissionRunning}
+                onTriggerMission={triggerMission}
+                missionStatus={missionStatus}
+              />
             </div>
+
+            {/* Specialist Fleet Status Cards (5 cards full width) */}
+            <AgentFleet
+              activeAgent={activeAgent}
+              events={visibleEvents}
+              stage={missionStatus}
+            />
+
+            {/* Swarm Topology & Control Graph */}
+            <MissionGraph
+              activeAgent={activeAgent}
+              events={visibleEvents}
+              stage={missionStatus}
+              missionState={missionState}
+            />
+
+            {/* Live Operational Console Stream */}
+            <AgentTimeline events={visibleEvents} />
+
+            {/* 3-Tier Layered Evidence Chain */}
+            <EvidenceChain
+              stage={missionStatus}
+              hasReplanned={hasReplanned}
+            />
           </div>
         )}
 
@@ -665,7 +653,7 @@ function App() {
 
       {/* ═══════════════ OPERATIONAL FOOTER ═══════════════ */}
       <footer className="border-t border-white/[0.08] bg-[#07080d]/95 backdrop-blur-xl mt-12 py-5">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-slate-500">
           <div className="flex items-center gap-2">
             <span className="text-white font-bold tracking-tight">GEOSENTINEL FLEET</span>
             <span>•</span>
